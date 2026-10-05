@@ -43,9 +43,6 @@ Additional material covers the automation lifecycle and the use of AI skills in 
 
 ```text
 automation-course/
-├── .kiro/                 # Repository-specific Kiro configuration
-│   ├── settings/          # Local MCP and workspace settings
-│   └── steering/          # Project guidance for Kiro sessions
 ├── docs/                  # Published course material
 ├── .gitignore             # Shared exclusions for the project
 └── README.md              # Course and repository overview
@@ -60,7 +57,7 @@ Install the following tools before starting:
 - Node.js LTS
 - npm
 - Git
-- Visual Studio Code or Kiro
+- Visual Studio Code
 - Basic TypeScript knowledge
 - Basic software testing concepts
 
@@ -103,4 +100,4 @@ When adding course content or examples:
 
 ## Repository Integration
 
-This repository uses GitHub for source control, collaboration, and future CI/CD workflows. Repository-specific Kiro settings are kept under `.kiro/` so this project can use GitHub-focused tools and guidance without inheriting Azure-specific configuration from another workspace.
+This repository uses GitHub for source control, collaboration, and future CI/CD workflows.
