@@ -1,0 +1,27 @@
+{
+  "name": "web-automation",
+  "version": "1.0.0",
+  "description": "Welcome to the Web Automation course repository. This project provides the examples, exercises, and learning material for building maintainable browser automation with Playwright and TypeScript.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anaelince/web-automation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/anaelince/web-automation/issues"
+  },
+  "homepage": "https://github.com/anaelince/web-automation#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

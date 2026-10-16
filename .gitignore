@@ -38,3 +38,9 @@ Thumbs.db
 *.tmp
 *.temp
 *.log
+
+# Playwright
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
