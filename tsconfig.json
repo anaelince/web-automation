@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    // Type checking
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+
+    // Module resolution
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "paths": {
+      "@tests/*": ["./tests/*"]
+    },
+
+    // Output (type-check only, no emit)
+    "noEmit": true,
+
+    // Interop
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+
+    // Target
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "ESNext.AsyncIterable"]
+  },
+  "include": [
+    "playwright.config.ts",
+    "tests/**/*.ts"
+  ]
+}
