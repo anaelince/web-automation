@@ -160,7 +160,32 @@ Each skill must:
 **Frontmatter description:**
 > Hub skill that orchestrates pom-architect and test-standards for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, or to scaffold new Page Objects, fixtures, and spec files following all agreed patterns. Invoke sub-skills independently for targeted checks.
 
-**Three invocation modes:**
+---
+
+### Hub Growth Policy (MUST be included in SKILL.md)
+
+The hub grows by adding new modes as the course progresses (M5 adds Modes 4–6, later modules may add more). To prevent uncontrolled growth and context overload, the following rules are **mandatory** and must be documented inside `automation-architect` `SKILL.md`:
+
+**Rule 1 — Add a mode only for a real gap.**
+A new mode is justified only when no existing mode (1–N) can detect the problem it targets. Before adding a mode, state explicitly which existing modes were considered and why they do not cover the gap.
+
+**Rule 2 — Document the gap in an ADR first.**
+Every new mode must be preceded by an ADR in `docs/decisions/` that records: the gap, the options considered (including extending an existing mode vs. adding a new one), and the decision. The mode is not added until the ADR exists.
+
+**Rule 3 — One domain per mode.**
+Each mode targets exactly one domain (e.g., git conventions, lifecycle process, refactor guidance). A mode that detects across multiple unrelated domains must be split or merged into the closest existing mode.
+
+**Rule 4 — Maximum 10 modes.**
+If a new mode would exceed 10 total modes, the team must first review existing modes for consolidation opportunities before adding. This limit exists to keep the SKILL.md within a size that an LLM agent can process reliably in a single context window.
+
+**Rule 5 — Retire modes that no longer apply.**
+When a module's scope is complete and a mode is no longer relevant to the active project, mark it as `[RETIRED]` in the SKILL.md with the reason. Do not delete — the history is part of the ADR record.
+
+These rules are enforced by the team, not by the skill itself. They must appear verbatim in the `## Hub Growth Policy` section of `automation-architect` `SKILL.md`.
+
+---
+
+**Three invocation modes (M4 baseline):**
 
 **Mode 1 — Full pipeline** (default)
 - Triggered by: "aplicar arquitectura", "apply architecture", "full review", "enforce all rules"
