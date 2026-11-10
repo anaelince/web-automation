@@ -1,6 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 import { LoginPage } from '@pages/LoginPage';
 import { InventoryPage } from '@pages/InventoryPage';
+import { HomePage } from '@pages/HomePage';
 import { users } from '@data/auth.data';
 
 // Re-export expect so all spec files import from '@fixtures' only
@@ -10,6 +11,7 @@ type Fixtures = {
   loginPage: LoginPage;
   inventoryPage: InventoryPage;
   authenticatedPage: LoginPage;
+  homePage: HomePage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -32,6 +34,13 @@ export const test = base.extend<Fixtures>({
   // Inventory page — requires an authenticated session
   inventoryPage: async ({ authenticatedPage }, use) => {
     const po = new InventoryPage(authenticatedPage.currentPage);
+    await use(po);
+  },
+
+  // Home page — no authentication required
+  homePage: async ({ page }, use) => {
+    const po = new HomePage(page);
+    await po.navigate('/');
     await use(po);
   },
 });
