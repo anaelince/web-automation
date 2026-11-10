@@ -1,6 +1,8 @@
 # Web Automation Course
 
-Welcome to the Web Automation course repository. This project provides the examples, exercises, and learning material for building maintainable browser automation with Playwright and TypeScript.
+A hands-on repository for learning browser automation with Playwright and TypeScript.
+Learners build a maintainable test framework from scratch, following industry patterns
+for Page Objects, fixtures, test organisation, and CI/CD with GitHub Actions.
 
 ## Course Scope
 
@@ -37,67 +39,236 @@ The course material is organized into progressive modules:
 | M11 | Reports and debugging |
 | M12 | CI, GitHub Actions, and wrap-up |
 
-Additional material covers the automation lifecycle and the use of AI skills in automation projects.
-
-## Repository Structure
-
-```text
-automation-course/
-├── docs/                  # Published course material
-├── .gitignore             # Shared exclusions for the project
-└── README.md              # Course and repository overview
-```
-
-The `docs/` directory is the publication area for the course material. New presentations, guides, diagrams, and reference documents should be organized there as they are added to the repository.
-
 ## Prerequisites
 
 Install the following tools before starting:
 
-- Node.js LTS
+- Node.js (LTS)
 - npm
-- Git
-- Visual Studio Code
+- Git + GitHub CLI (`gh`) — required for git-standards workflow
+- Visual Studio Code or **Kiro IDE** (recommended — required to use AI skills)
+- Playwright browsers (installed via `npx playwright install`)
 - Basic TypeScript knowledge
 - Basic software testing concepts
 
-Playwright and the project dependencies will be added as the implementation evolves.
-
-## Getting Started
-
-Clone the repository and enter the project directory:
+## Quick Start
 
 ```bash
+# 1. Clone and enter the project
 git clone https://github.com/anaelince/web-automation.git
 cd web-automation
-```
 
-Install dependencies after the project configuration is available:
-
-```bash
+# 2. Install dependencies
 npm install
+
+# 3. Install Playwright browsers
+npx playwright install
+
+# 4. Configure environment variables
+cp .env.example .env
+# Edit .env and set BASE_URL and credentials
+
+# 5. Verify TypeScript compiles
+npm run typecheck
+
+# 6. Run smoke tests
+npm run test:smoke
+
+# 7. Open the HTML report
+npm run report
 ```
 
-Run the available Playwright tests with:
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm test` | Run all tests across chromium, firefox, and webkit |
+| `npm run test:smoke` | Run smoke suite only |
+| `npm run test:headed` | Run tests with a visible browser window |
+| `npm run test:debug` | Run tests in Playwright debug mode |
+| `npm run typecheck` | Type-check TypeScript without running tests |
+| `npm run report` | Open the last Playwright HTML report |
+
+## Repository Structure
+
+```text
+web-automation/
+│
+├── src/                          # Framework source code
+│   ├── ui/
+│   │   ├── pages/                # Page Objects (extend BasePage)
+│   │   └── components/           # Reusable UI component objects (reserved)
+│   ├── fixtures/
+│   │   └── index.ts              # Playwright fixture definitions
+│   ├── data/
+│   │   └── auth.data.ts          # Test user accounts
+│   ├── config/
+│   │   └── env.ts                # Environment variable validation
+│   ├── helpers/                  # (reserved for shared utilities)
+│   └── api/                      # (reserved for API client layer)
+│
+├── tests/                        # Spec files
+│   └── ui/
+│       ├── smoke/                # Critical path test cases
+│       │   └── {feature}/        # One folder per app feature
+│       │       └── TC{N}-{name}.spec.ts   # One file per test case
+│       └── regression/           # Edge cases and negative paths
+│
+├── docs/                         # Course material and architecture prompts
+│   └── decisions/                # Architecture Decision Records (ADRs)
+│
+├── .kiro/
+│   └── skills/                   # Kiro AI skill definitions
+│       ├── automation-architect/ # Hub — orchestrates all sub-skills
+│       ├── pom-architect/        # Page Object Model rules
+│       ├── test-standards/       # Spec code quality rules
+│       ├── spec-standards/       # Spec organisation and TC naming rules
+│       └── git-standards/        # Git workflow conventions and execution
+│
+├── .env.example                  # Environment variable template
+├── playwright.config.ts          # Playwright configuration
+├── tsconfig.json                 # TypeScript configuration
+└── package.json
+```
+
+## Framework Architecture
+
+### Page Object Model
+
+All page interactions are encapsulated in Page Objects (`src/ui/pages/`).
+Every Page Object extends `BasePage`, which provides the `page` reference and a
+`navigate()` method. Locators are defined as `get` properties — never as constructor
+fields — because TypeScript's `ES2022` target initialises class fields before the
+parent constructor runs.
+
+```typescript
+// ✅ Correct — getter runs lazily, this.page is already set
+get searchInput() {
+  return this.page.locator('[data-test="search-input"]');
+}
+```
+
+### Fixtures
+
+Page Object instantiation is handled by Playwright fixtures (`src/fixtures/index.ts`).
+Tests never create `new Page()` directly — they declare a fixture as a parameter.
+
+```typescript
+test('TC9: Search Product', async ({ homePage }) => {
+  // homePage is already instantiated and navigated by the fixture
+});
+```
+
+### Test Case Organisation
+
+Each test case lives in its own file under `tests/ui/{suite}/{feature}/`:
+
+```
+tests/ui/smoke/products/TC8-verify-all-products-and-detail.spec.ts
+tests/ui/smoke/products/TC9-search-product.spec.ts
+```
+
+Steps inside each test use `test.step()` — which appears as named entries in the
+Playwright HTML report — instead of inline comments.
+
+```typescript
+test('TC8: Verify All Products and product detail page', async ({ homePage }) => {
+  await test.step('Verify home page is visible', async () => {
+    await expect(homePage.homePageIndicator).toBeVisible();
+  });
+
+  const productsPage = await test.step('Navigate to All Products page', async () => {
+    const page = await homePage.clickProducts();
+    await expect(page.allProductsHeading).toBeVisible();
+    return page;
+  });
+});
+```
+
+## Environment Setup
+
+The project requires a `.env` file in the root (not committed to git).
+Copy `.env.example` and fill in the values:
 
 ```bash
-npx playwright test
+cp .env.example .env
 ```
 
-## Documentation
+The required variables are defined and validated in `src/config/env.ts`.
+The test run will fail with a descriptive error if any required variable is missing.
 
-Course presentations and supporting resources are stored in [`docs/`](docs/). The documentation will grow alongside the practical automation examples so that each topic can be studied and applied in the same repository.
+## Kiro AI Skills
+
+This project includes a set of Kiro AI skills under `.kiro/skills/` that enforce
+and apply the framework's conventions automatically.
+
+| Skill | Purpose | Load when... |
+|-------|---------|--------------|
+| `pom-architect` | Enforces Page Object Model rules | Creating or reviewing Page Objects |
+| `test-standards` | Enforces spec code quality | Writing or reviewing spec files |
+| `spec-standards` | Enforces TC folder structure and naming | Creating or reorganising test cases |
+| `git-standards` | Validates and executes git workflow | Before committing, pushing, or opening a PR |
+| `automation-architect` | Orchestrates all skills (hub) | Full architecture review or scaffolding a new page |
+
+**Example usage in Kiro chat:**
+
+```
+"apply architecture"       → runs all code-quality skills on the project
+"scaffold LoginPage"       → generates Page Object + fixture + spec skeleton
+"check git"                → validates branch name and commit messages
+"git workflow"             → commit + push + open PR following conventions
+"check spec structure"     → validates TC folder hierarchy and naming
+"update readme"            → syncs README sections with current project state (Mode 5)
+```
+
+> **Note for maintainers:** This section is auto-updated by `automation-architect`
+> Mode 5 — README Sync. After adding or retiring a skill, trigger Mode 5 to keep
+> this table accurate.
+
+## Git Workflow
+
+This project follows a structured git workflow enforced by the `git-standards` skill.
+
+**Branch naming:**
+```
+test/<kebab-case-scope>    # for new test cases
+fix/<kebab-case-scope>     # for defect corrections
+
+Examples:
+  test/tc8-verify-products
+  fix/login-redirect
+```
+
+**Commit message format** (Conventional Commits):
+```
+type(scope): description
+
+Allowed types: feat · fix · refactor · chore · docs
+Scope: optional, kebab-case
+
+Examples:
+  feat(tc8): add products page verification
+  fix(login): correct redirect after logout
+  chore: update playwright version
+```
+
+Every branch must contain at least one `feat` or `fix` commit before opening a PR.
+
+Run `git-standards` (load the skill in Kiro and say `"check git"`) before every PR.
+If architectural files changed in your branch, `git-standards` will warn you to run
+`"update readme"` in `automation-architect` before pushing.
+
+> **Note for maintainers:** This section is auto-updated by `automation-architect`
+> Mode 5 — README Sync when branch patterns or commit types change in `git-standards`.
 
 ## Contribution Guidelines
 
-When adding course content or examples:
-
-1. Keep documentation and code examples in English.
-2. Place published learning material in `docs/`.
-3. Follow the existing module naming convention.
-4. Keep examples focused on one automation concept at a time.
-5. Do not commit secrets, local environment files, test reports, or generated Playwright artifacts.
-
-## Repository Integration
-
-This repository uses GitHub for source control, collaboration, and future CI/CD workflows.
+1. Write all documentation and code examples in English.
+2. Follow the TC folder structure: `tests/ui/{suite}/{feature}/TC{N}-{name}.spec.ts`
+3. One test case per file. Data-driven variants stay in the same file.
+4. Use `test.step()` for step labelling — no inline `// Step N:` comments.
+5. Respect the git workflow conventions (branch naming, commit format).
+6. Do not commit secrets, `.env` files, test reports, or generated Playwright artifacts.
+7. Run `npm run typecheck` before committing.
+8. Load the appropriate Kiro skill before creating or refactoring files to verify
+   conventions are met.
