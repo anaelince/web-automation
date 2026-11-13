@@ -5,7 +5,7 @@ Use this prompt directly with Kiro to create a new skill
 
 This is a NEW skill — do NOT modify `spec-code-standard`. After creating the skill:
 - Register `spec-organisation-standard` as a third sub-skill in `automation-architect/SKILL.md`
-- Update Mode 1 (Full Pipeline) to run `spec-organisation-standard` alongside `pom-architect`
+- Update Mode 1 (Full Pipeline) to run `spec-organisation-standard` alongside `ui-pom-standard`
   and `spec-code-standard`
 - Update the Sub-Skill Invocation Reference table in `automation-architect/SKILL.md`
 
@@ -19,7 +19,7 @@ fixtures, data hygiene).
 
 | Skill | Domain |
 |-------|--------|
-| `pom-architect` | Page Object layer structure |
+| `ui-pom-standard` | Page Object layer structure |
 | `spec-code-standard` | Spec code quality — imports, fixtures, credentials, framework |
 | `spec-organisation-standard` | Spec organisation — folder hierarchy, file naming, TC IDs, step definition, *(future: tagging, test lifecycle)* |
 
@@ -360,4 +360,5 @@ Fix:   Wrap each logical group into await test.step('description', async () => {
 | Goal | Skill to load | Trigger phrase example |
 |------|---------------|------------------------|
 | Fix TC folder / naming / step violations | `spec-organisation-standard` | `"check spec structure"` |
+
 

@@ -1,11 +1,11 @@
-# Meta-prompt: Create new skill lifecycle-architect
+# Meta-prompt: Create new skill api-setup-teardown-standard
 
 Use this prompt directly with Kiro to create a new skill
-`.kiro/skills/lifecycle-architect/SKILL.md` for any Playwright + TypeScript project.
+`.kiro/skills/api-setup-teardown-standard/SKILL.md` for any Playwright + TypeScript project.
 
 This is a NEW skill — do NOT modify `spec-code-standard`. After creating the skill:
-- Register `lifecycle-architect` as a fifth sub-skill in `automation-architect/SKILL.md`
-- Update Mode 1 (Full Pipeline) to run `lifecycle-architect` after `spec-organisation-standard`
+- Register `api-setup-teardown-standard` as a fifth sub-skill in `automation-architect/SKILL.md`
+- Update Mode 1 (Full Pipeline) to run `api-setup-teardown-standard` after `spec-organisation-standard`
 - Add Mode 6 — Lifecycle Infrastructure to `automation-architect/SKILL.md`
 - Update the Sub-Skill Registry and Scan Scope Ownership tables
 - Update the Sub-Skill Invocation Reference table
@@ -15,17 +15,17 @@ This is a NEW skill — do NOT modify `spec-code-standard`. After creating the s
 
 ## Skill overview
 
-`lifecycle-architect` owns the **API layer structure and lifecycle infrastructure** of
+`api-setup-teardown-standard` owns the **API layer structure and lifecycle infrastructure** of
 the test framework. It governs how setup and teardown are implemented using the API,
 ensuring tests are deterministic, parallel-safe, and portable across environments.
 
 | Skill | Domain |
 |-------|--------|
-| `pom-architect` | Page Object layer structure |
+| `ui-pom-standard` | Page Object layer structure |
 | `spec-code-standard` | Spec code quality — imports, fixtures, credentials, framework |
 | `spec-organisation-standard` | Spec organisation — folder hierarchy, file naming, TC IDs, steps |
-| `git-standards` | Git workflow conventions |
-| `lifecycle-architect` | API layer structure · setup/teardown infrastructure · mocking |
+| `git-workflow-docs-standard` | Git workflow conventions |
+| `api-setup-teardown-standard` | API layer structure · setup/teardown infrastructure · mocking |
 
 **Gap this skill fills:** No existing skill governs `src/api/`. The `@api/*` path alias
 is defined in `tsconfig.json` and referenced in the project structure, but its internal
@@ -245,7 +245,7 @@ export async function mockGetBooks(page: Page, books: Book[]): Promise<void> {
 
 ## Prompt
 
-Create `.kiro/skills/lifecycle-architect/SKILL.md` with the following content.
+Create `.kiro/skills/api-setup-teardown-standard/SKILL.md` with the following content.
 
 ---
 
@@ -253,7 +253,7 @@ Create `.kiro/skills/lifecycle-architect/SKILL.md` with the following content.
 
 ```yaml
 ---
-name: lifecycle-architect
+name: api-setup-teardown-standard
 description: >
   Enforce and scaffold the API layer infrastructure for Playwright + TypeScript projects.
   Governs the structure of ApiClient, endpoints, models, controllers, and mocks under
@@ -343,7 +343,7 @@ for a new resource that has no existing API support.
 
 **Output:**
 ```
-[lifecycle-architect] SCAFFOLD COMPLETE — New
+[api-setup-teardown-standard] SCAFFOLD COMPLETE — New
 ─────────────────────────────────────────────
 Created:  src/api/client/ApiClient.ts           (if new)
 Created:  src/api/endpoints/<resource>.endpoints.ts
@@ -377,7 +377,7 @@ for a resource that does not yet have a controller.
 
 **Output:**
 ```
-[lifecycle-architect] SCAFFOLD COMPLETE — Add
+[api-setup-teardown-standard] SCAFFOLD COMPLETE — Add
 ─────────────────────────────────────────────
 Created:  src/api/endpoints/<resource>.endpoints.ts
 Created:  src/api/models/<resource>.model.ts
@@ -659,7 +659,7 @@ async delete(url: string, options?: { data?: unknown; params?: Record<string, st
 ### Violation Output Format
 
 ```
-[lifecycle-architect] SEVERITY — RULE_NAME
+[api-setup-teardown-standard] SEVERITY — RULE_NAME
 File:  <relative path from project root>
 Line:  <line number>
 Issue: <one sentence describing the problem>
@@ -668,31 +668,31 @@ Fix:   <one sentence describing the fix> | AUTO-APPLIED | MANUAL-FIX
 
 **Examples:**
 ```
-[lifecycle-architect] ERROR — API_CLIENT_IS_ONLY_HTTP_ENTRY_POINT
+[api-setup-teardown-standard] ERROR — API_CLIENT_IS_ONLY_HTTP_ENTRY_POINT
 File:  src/api/controllers/BookController.ts
 Line:  12
 Issue: Controller calls request.get() directly instead of delegating to ApiClient.
 Fix:   Replace with this.client.get<Book[]>(BooksEndpoints.base). | AUTO-APPLIED
 
-[lifecycle-architect] ERROR — TEARDOWN_MIRRORS_SETUP
+[api-setup-teardown-standard] ERROR — TEARDOWN_MIRRORS_SETUP
 File:  src/fixtures/index.ts
 Line:  34
 Issue: 'createdBook' fixture creates a book via API but has no teardown after use().
 Fix:   Add await controller.delete(book.bookId) after the use() call. | MANUAL-FIX
 
-[lifecycle-architect] ERROR — ENDPOINTS_CENTRALIZED
+[api-setup-teardown-standard] ERROR — ENDPOINTS_CENTRALIZED
 File:  src/api/controllers/BookController.ts
 Line:  8
 Issue: Hardcoded URL '/api/v1/Books' found — endpoint constants must be used instead.
 Fix:   Replace with BooksEndpoints.base from @api/endpoints/books.endpoints. | AUTO-APPLIED
 
-[lifecycle-architect] ERROR — NO_LIFECYCLE_INSTANTIATION_IN_SPEC
+[api-setup-teardown-standard] ERROR — NO_LIFECYCLE_INSTANTIATION_IN_SPEC
 File:  tests/ui/smoke/books/TC10-add-book.spec.ts
 Line:  8
 Issue: Spec instantiates BookController directly inside the test body.
 Fix:   Extract to a 'createdBook' fixture in src/fixtures/index.ts and inject it as a parameter. | AUTO-APPLIED
 
-[lifecycle-architect] WARNING — LIFECYCLE_FIXTURE_NAMING_CONVENTION
+[api-setup-teardown-standard] WARNING — LIFECYCLE_FIXTURE_NAMING_CONVENTION
 File:  src/fixtures/index.ts
 Line:  41
 Issue: Fixture 'newBook' creates data with teardown but does not follow the 'created<Resource>' naming pattern.
@@ -724,28 +724,28 @@ Fix:   Rename to 'createdBook' and update all references in spec files. | AUTO-A
 
    | Skill | Domain | File Scope | Rules / Checks | Added | Status |
    |-------|--------|-----------|----------------|-------|--------|
-   | `lifecycle-architect` | API layer structure · setup/teardown · fixture injection | `src/api/**/*.ts` · `src/fixtures/index.ts` · `tests/**/*.spec.ts` | R1–R8 | M6 | Active |
+   | `api-setup-teardown-standard` | API layer structure · setup/teardown · fixture injection | `src/api/**/*.ts` · `src/fixtures/index.ts` · `tests/**/*.spec.ts` | R1–R8 | M6 | Active |
 
 2. **Scan Scope Ownership table**: add new rows:
 
    | File / Scope | Owner skill | Concern |
    |--------------|-------------|---------|
-   | `src/api/client/**/*.ts` | `lifecycle-architect` | HTTP entry point contract |
-   | `src/api/controllers/**/*.ts` | `lifecycle-architect` | Controller structure and dependencies |
-   | `src/api/endpoints/**/*.ts` | `lifecycle-architect` | URL centralisation |
-   | `src/api/models/**/*.ts` | `lifecycle-architect` | Interface placement |
-   | `src/api/mocks/**/*.ts` | `lifecycle-architect` | Route stub structure |
-   | `src/fixtures/index.ts` — teardown contract | `lifecycle-architect` | Setup/teardown pairing |
-   | `src/fixtures/index.ts` — lifecycle fixture naming | `lifecycle-architect` | Naming convention (R8) |
-   | `tests/**/*.spec.ts` — controller/client instantiation | `lifecycle-architect` | No lifecycle instantiation in specs (R7) |
+   | `src/api/client/**/*.ts` | `api-setup-teardown-standard` | HTTP entry point contract |
+   | `src/api/controllers/**/*.ts` | `api-setup-teardown-standard` | Controller structure and dependencies |
+   | `src/api/endpoints/**/*.ts` | `api-setup-teardown-standard` | URL centralisation |
+   | `src/api/models/**/*.ts` | `api-setup-teardown-standard` | Interface placement |
+   | `src/api/mocks/**/*.ts` | `api-setup-teardown-standard` | Route stub structure |
+   | `src/fixtures/index.ts` — teardown contract | `api-setup-teardown-standard` | Setup/teardown pairing |
+   | `src/fixtures/index.ts` — lifecycle fixture naming | `api-setup-teardown-standard` | Naming convention (R8) |
+   | `tests/**/*.spec.ts` — controller/client instantiation | `api-setup-teardown-standard` | No lifecycle instantiation in specs (R7) |
 
    > Note: `src/fixtures/index.ts` is already owned by `spec-code-standard` for fixture
-   > completeness and import hygiene. `lifecycle-architect` owns only the teardown
+   > completeness and import hygiene. `api-setup-teardown-standard` owns only the teardown
    > contract concern (R4). There is no scan overlap.
 
 3. **Mode 1 — Full Pipeline**: add step after `spec-organisation-standard`:
    ```markdown
-   6. Run `lifecycle-architect` on `src/api/` and `src/fixtures/index.ts` (teardown only):
+   6. Run `api-setup-teardown-standard` on `src/api/` and `src/fixtures/index.ts` (teardown only):
       - Detect all API layer violations
       - Auto-fix every fixable violation (R1–R3, R5–R6)
       - Collect R4 (teardown) items as manual fixes
@@ -755,10 +755,10 @@ Fix:   Rename to 'createdBook' and update all references in spec files. | AUTO-A
    ```
    [automation-architect] PIPELINE COMPLETE
    ─────────────────────────────────────────
-   pom-architect:        X violations found — Y auto-applied
+   ui-pom-standard:        X violations found — Y auto-applied
    spec-code-standard:       X violations found — Y auto-applied
    spec-organisation-standard:       X violations found — Y auto-applied
-   lifecycle-architect:  X violations found — Y auto-applied
+   api-setup-teardown-standard:  X violations found — Y auto-applied
    Remaining manual fixes: <list if any, or "none">
    [automation-architect] ✅ All rules satisfied.
    ```
@@ -776,13 +776,13 @@ Fix:   Rename to 'createdBook' and update all references in spec files. | AUTO-A
    or when extending an existing API layer with a new resource.
 
    **Steps:**
-   1. Load and invoke `lifecycle-architect`
+   1. Load and invoke `api-setup-teardown-standard`
    2. Determine mode automatically:
       - `src/api/` does not exist → **New**
       - `src/api/` exists and resource has no controller → **Add**
    3. Forward all output verbatim
 
-   **Note:** Load `lifecycle-architect` directly for standalone API layer work
+   **Note:** Load `api-setup-teardown-standard` directly for standalone API layer work
    without activating the hub.
    ```
 
@@ -790,15 +790,16 @@ Fix:   Rename to 'createdBook' and update all references in spec files. | AUTO-A
 
    | Goal | Skill to load | Trigger phrase example |
    |------|---------------|------------------------|
-   | Scaffold or extend the API layer for setup/teardown | `lifecycle-architect` | `"scaffold api for books"` |
+   | Scaffold or extend the API layer for setup/teardown | `api-setup-teardown-standard` | `"scaffold api for books"` |
 
 6. **Project folder structure** in Project Context: update `src/api/` entry:
    ```
    api/
-     client/       ← ApiClient (HTTP entry point)   (lifecycle-architect)
-     endpoints/    ← URL constants per resource      (lifecycle-architect)
-     models/       ← Request/response interfaces     (lifecycle-architect)
-     controllers/  ← Business operations             (lifecycle-architect)
-     mocks/        ← Route stub factories            (lifecycle-architect)
+     client/       ← ApiClient (HTTP entry point)   (api-setup-teardown-standard)
+     endpoints/    ← URL constants per resource      (api-setup-teardown-standard)
+     models/       ← Request/response interfaces     (api-setup-teardown-standard)
+     controllers/  ← Business operations             (api-setup-teardown-standard)
+     mocks/        ← Route stub factories            (api-setup-teardown-standard)
    ```
+
 

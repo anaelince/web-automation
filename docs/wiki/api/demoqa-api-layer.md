@@ -1,6 +1,6 @@
 # API Layer — `src/api/sites/demoqa/`
 
-> Built and enforced by the **`lifecycle-architect`** skill (R1–R11).  
+> Built and enforced by the **`api-setup-teardown-standard`** skill (R1–R11).  
 > Path alias: `@api/sites/demoqa/*` → `src/api/sites/demoqa/*`
 
 ---
@@ -177,3 +177,4 @@ TEARDOWN (after test body — always runs, even on test failure)
 | R8 | LIFECYCLE_FIXTURE_NAMING_CONVENTION | `<resource>Controller` / `created<R>` / `clean<R>` / `mock<R>` | WARNING | AUTO |
 | R10 | TOKEN_REFRESH_IN_TEARDOWN | Fixtures covering UI-login tests must regenerate the API token in teardown | WARNING | MANUAL |
 | R11 | API_CLIENT_STATUS_CHECKED | Every `ApiClient` method checks `response.ok()` and throws on non-2xx | ERROR | AUTO |
+

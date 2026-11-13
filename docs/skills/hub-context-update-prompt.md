@@ -51,11 +51,11 @@ with the expanded version below, and append the two new sections
 
 | Alias | Resolves to | Used by |
 |-------|-------------|---------|
-| `@pages/*` | `src/ui/pages/*` | pom-architect, spec-code-standard |
-| `@components/*` | `src/ui/components/*` | pom-architect |
+| `@pages/*` | `src/ui/pages/*` | ui-pom-standard, spec-code-standard |
+| `@components/*` | `src/ui/components/*` | ui-pom-standard |
 | `@fixtures` | `src/fixtures/index` | spec-code-standard |
 | `@fixtures/*` | `src/fixtures/*` | spec-code-standard |
-| `@data/*` | `src/data/*` | spec-code-standard, pom-architect |
+| `@data/*` | `src/data/*` | spec-code-standard, ui-pom-standard |
 | `@config/*` | `src/config/*` | spec-code-standard |
 | `@helpers/*` | `src/helpers/*` | (reserved for future helpers) |
 | `@api/*` | `src/api/*` | (reserved for API layer) |
@@ -65,11 +65,11 @@ with the expanded version below, and append the two new sections
 ```
 src/
   ui/
-    pages/          ← Page Objects       (pom-architect)
-    components/     ← UI Components      (pom-architect)
+    pages/          ← Page Objects       (ui-pom-standard)
+    components/     ← UI Components      (ui-pom-standard)
   fixtures/         ← Playwright fixtures (spec-code-standard)
-  data/             ← Test data files     (spec-code-standard, pom-architect)
-  config/           ← Env config (ENV.ts) (spec-code-standard, pom-architect)
+  data/             ← Test data files     (spec-code-standard, ui-pom-standard)
+  config/           ← Env config (ENV.ts) (spec-code-standard, ui-pom-standard)
   helpers/          ← Shared utilities    (future)
   api/              ← API client layer    (future)
 tests/
@@ -137,10 +137,10 @@ a skill is added, updated, or retired.
 
 | Skill | Domain | File Scope | Rules / Checks | Added | Status |
 |-------|--------|-----------|----------------|-------|--------|
-| `pom-architect` | Page Object structure | `src/ui/pages/**/*.ts` · `src/ui/components/**/*.ts` | R1–R8 | M4 | Active |
+| `ui-pom-standard` | Page Object structure | `src/ui/pages/**/*.ts` · `src/ui/components/**/*.ts` | R1–R8 | M4 | Active |
 | `spec-code-standard` | Spec code quality | `tests/**/*.spec.ts` · `src/fixtures/index.ts` | R1–R8 | M4 | Active |
 | `spec-organisation-standard` | Spec organisation & lifecycle | `tests/**/*.spec.ts` | R1–R5 | M5 | Active |
-| `git-standards` | Git workflow | git state (no files) | C1–C3, E1–E5 | M5 | Active |
+| `git-workflow-docs-standard` | Git workflow | git state (no files) | C1–C3, E1–E5 | M5 | Active |
 
 ### Scan scope ownership
 
@@ -149,13 +149,13 @@ check the same property on the same file.
 
 | File / Scope | Owner skill | Concern |
 |--------------|-------------|---------|
-| `src/ui/pages/**/*.ts` | `pom-architect` | POM structure, locators, actions |
-| `src/ui/components/**/*.ts` | `pom-architect` | Component structure |
+| `src/ui/pages/**/*.ts` | `ui-pom-standard` | POM structure, locators, actions |
+| `src/ui/components/**/*.ts` | `ui-pom-standard` | Component structure |
 | `src/fixtures/index.ts` | `spec-code-standard` | Fixture completeness, import hygiene |
 | `tests/**/*.spec.ts` — imports, fixtures, credentials | `spec-code-standard` | Code quality |
 | `tests/**/*.spec.ts` — folder, naming, TC IDs, steps | `spec-organisation-standard` | Organisation |
 | `src/**/*.ts` (non-PO, non-fixture) | `spec-code-standard` | Import hygiene only |
-| git branch + commit history | `git-standards` | Workflow conventions |
+| git branch + commit history | `git-workflow-docs-standard` | Workflow conventions |
 ```
 
 ---
@@ -239,10 +239,10 @@ When `tsconfig.json` changes, assess the impact on each skill:
 
 | tsconfig change | Skills affected | Action required |
 |-----------------|-----------------|-----------------|
-| `target` downgraded (e.g. ES2021) | `pom-architect` | R2 (getters) may become optional — review |
-| `strict` disabled | `spec-code-standard`, `pom-architect` | Rules enforcing type safety become less critical |
-| New path alias added | `spec-code-standard`, `pom-architect` | Add alias to the Path Alias Map in both skills |
-| Path alias removed | `spec-code-standard`, `pom-architect` | Remove alias; update auto-fix guidance |
+| `target` downgraded (e.g. ES2021) | `ui-pom-standard` | R2 (getters) may become optional — review |
+| `strict` disabled | `spec-code-standard`, `ui-pom-standard` | Rules enforcing type safety become less critical |
+| New path alias added | `spec-code-standard`, `ui-pom-standard` | Add alias to the Path Alias Map in both skills |
+| Path alias removed | `spec-code-standard`, `ui-pom-standard` | Remove alias; update auto-fix guidance |
 | `moduleResolution` changed | All skills | Re-verify import resolution examples |
 
 ---
@@ -254,10 +254,10 @@ skills are affected. Use this impact table to identify what to update:
 
 | Changed component | Skills to update | What to check |
 |-------------------|-----------------|---------------|
-| `BasePage` API | `pom-architect` | R1 (extends), R5 (navigate) |
+| `BasePage` API | `ui-pom-standard` | R1 (extends), R5 (navigate) |
 | `src/fixtures/index.ts` pattern | `spec-code-standard` | R3 (no manual beforeEach), R4 (fixture registration) |
-| `src/data/auth.data.ts` structure | `spec-code-standard`, `pom-architect` | R7/R8 (credential references) |
-| `src/config/env.ts` (new ENV var) | `spec-code-standard`, `pom-architect` | Update data hygiene examples |
+| `src/data/auth.data.ts` structure | `spec-code-standard`, `ui-pom-standard` | R7/R8 (credential references) |
+| `src/config/env.ts` (new ENV var) | `spec-code-standard`, `ui-pom-standard` | Update data hygiene examples |
 | `playwright.config.ts` (testDir) | `spec-organisation-standard` | R1 folder structure root |
 
 ---
@@ -281,13 +281,13 @@ Some skills produce output that other skills depend on. When running the Full Pi
 (Mode 1), maintain this execution order:
 
 ```
-1. pom-architect      ← establishes correct PO layer (pages, components)
+1. ui-pom-standard      ← establishes correct PO layer (pages, components)
 2. spec-code-standard     ← validates spec code quality (imports, fixtures)
 3. spec-organisation-standard     ← validates spec organisation (requires spec-code-standard clean)
-4. git-standards      ← validates git state (run last, before push/PR)
+4. git-workflow-docs-standard      ← validates git state (run last, before push/PR)
 ```
 
-If `pom-architect` produces violations that are not fixed, `spec-organisation-standard` and
+If `ui-pom-standard` produces violations that are not fixed, `spec-organisation-standard` and
 `spec-code-standard` may report false positives (e.g., a missing PO method triggers
 a spec-code-standard violation).
 ```
@@ -310,7 +310,7 @@ And update the output format to include the new skill:
 ```
 [automation-architect] PIPELINE COMPLETE
 ─────────────────────────────────────────
-pom-architect:    X violations found — Y auto-applied
+ui-pom-standard:    X violations found — Y auto-applied
 spec-code-standard:   X violations found — Y auto-applied
 spec-organisation-standard:   X violations found — Y auto-applied
 Remaining manual fixes: <list if any, or "none">
@@ -354,7 +354,7 @@ section header to `(5 of 10 slots used)`.
 **Triggers:** `"update readme"` · `"sync readme"` · `"readme out of date"` · `"update docs"`
 
 **When to use:** After adding a skill, adding a mode, changing the project structure,
-or completing a course module. Also triggered automatically by `git-standards` C4
+or completing a course module. Also triggered automatically by `git-workflow-docs-standard` C4
 when architectural files change in a branch without a corresponding README update.
 
 **Tracked sections and their sources:**
@@ -366,7 +366,7 @@ when architectural files change in a branch without a corresponding README updat
 | §6 Repository Structure | Actual folder tree + `.kiro/skills/` directories |
 | §7 Framework Architecture | `src/ui/pages/BasePage.ts` · `src/fixtures/index.ts` |
 | §9 Kiro AI Skills | `.kiro/skills/*/SKILL.md` frontmatter (name + description) |
-| §10 Git Workflow | `git-standards` SKILL.md conventions |
+| §10 Git Workflow | `git-workflow-docs-standard` SKILL.md conventions |
 
 Sections NOT tracked by this mode (manual updates only):
 - §1 Description · §2 Learning Path · §4 Quick Start · §8 Environment Setup · §11 Contribution Guidelines
@@ -384,7 +384,7 @@ Sections NOT tracked by this mode (manual updates only):
      verify the code example in README matches
    - **§9 Kiro AI Skills**: list all `SKILL.md` files under `.kiro/skills/`; read each
      frontmatter `name` and `description`; compare against the README skills table
-   - **§10 Git Workflow**: read branch pattern and commit types from `git-standards`
+   - **§10 Git Workflow**: read branch pattern and commit types from `git-workflow-docs-standard`
      SKILL.md; compare against README examples
 3. For each section with a detected difference: update the README section in place
 4. For sections that are in sync: leave unchanged
@@ -398,7 +398,7 @@ Sections NOT tracked by this mode (manual updates only):
 §5 Commands:          IN SYNC | UPDATED — added 'test:regression'
 §6 Structure:         IN SYNC | UPDATED — added 'src/api/' folder entry
 §7 Architecture:      IN SYNC
-§9 Kiro AI Skills:    IN SYNC | UPDATED — added 'git-standards' row
+§9 Kiro AI Skills:    IN SYNC | UPDATED — added 'git-workflow-docs-standard' row
 §10 Git Workflow:     IN SYNC
 ─────────────────────────────────────────
 [automation-architect] ✅ README is up to date.
@@ -409,4 +409,5 @@ Sections NOT tracked by this mode (manual updates only):
 **Note:** This mode only updates the tracked sections listed above. Sections marked
 as manual-only (Learning Path, Quick Start, etc.) are reported as out-of-scope if
 the user asks about them.
+
 

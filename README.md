@@ -45,7 +45,7 @@ Install the following tools before starting:
 
 - Node.js (LTS)
 - npm
-- Git + GitHub CLI (`gh`) — required for git-standards workflow
+- Git + GitHub CLI (`gh`) — required for git-workflow-docs-standard workflow
 - Visual Studio Code or **Kiro IDE** (recommended — required to use AI skills)
 - Playwright browsers (installed via `npx playwright install`)
 - Basic TypeScript knowledge
@@ -140,11 +140,11 @@ web-automation/
 ├── .kiro/
 │   └── skills/                   # Kiro AI skill definitions
 │       ├── automation-architect/ # Hub — orchestrates all sub-skills
-│       ├── lifecycle-architect/  # API layer structure and teardown rules
-│       ├── pom-architect/        # Page Object Model rules
+│       ├── api-setup-teardown-standard/  # API layer structure and teardown rules
+│       ├── ui-pom-standard/        # Page Object Model rules
 │       ├── spec-code-standard/       # Spec code quality + site placement rules
 │       ├── spec-organisation-standard/       # Spec organisation and TC naming rules
-│       └── git-standards/        # Git workflow conventions and execution
+│       └── git-workflow-docs-standard/        # Git workflow conventions and execution
 │
 ├── .env.example                  # Environment variable template
 ├── playwright.config.ts          # Playwright configuration
@@ -226,11 +226,11 @@ and apply the framework's conventions automatically.
 
 | Skill | Purpose | Load when... |
 |-------|---------|--------------|
-| `pom-architect` | Enforces Page Object Model rules | Creating or reviewing Page Objects |
+| `ui-pom-standard` | Enforces Page Object Model rules | Creating or reviewing Page Objects |
 | `spec-code-standard` | Enforces spec code quality and site-layer placement | Writing or reviewing spec files |
 | `spec-organisation-standard` | Enforces TC folder structure and naming | Creating or reorganising test cases |
-| `git-standards` | Validates and executes git workflow | Before committing, pushing, or opening a PR |
-| `lifecycle-architect` | Enforces API layer structure, teardown contract, and token refresh rules | Implementing API-based setup/teardown or scaffolding a new API resource |
+| `git-workflow-docs-standard` | Validates and executes git workflow | Before committing, pushing, or opening a PR |
+| `api-setup-teardown-standard` | Enforces API layer structure, teardown contract, and token refresh rules | Implementing API-based setup/teardown or scaffolding a new API resource |
 | `automation-architect` | Orchestrates all skills (hub) | Full architecture review or scaffolding a new page |
 
 **Example usage in Kiro chat:**
@@ -251,7 +251,7 @@ and apply the framework's conventions automatically.
 
 ## Git Workflow
 
-This project follows a structured git workflow enforced by the `git-standards` skill.
+This project follows a structured git workflow enforced by the `git-workflow-docs-standard` skill.
 
 **Branch naming:**
 ```
@@ -278,12 +278,12 @@ Examples:
 
 Every branch must contain at least one `feat` or `fix` commit before opening a PR.
 
-Run `git-standards` (load the skill in Kiro and say `"check git"`) before every PR.
-If architectural files changed in your branch, `git-standards` will warn you to run
+Run `git-workflow-docs-standard` (load the skill in Kiro and say `"check git"`) before every PR.
+If architectural files changed in your branch, `git-workflow-docs-standard` will warn you to run
 `"update readme"` in `automation-architect` before pushing.
 
 > **Note for maintainers:** This section is auto-updated by `automation-architect`
-> Mode 5 — README Sync when branch patterns or commit types change in `git-standards`.
+> Mode 5 — README Sync when branch patterns or commit types change in `git-workflow-docs-standard`.
 
 ## Contribution Guidelines
 
@@ -296,4 +296,5 @@ If architectural files changed in your branch, `git-standards` will warn you to 
 7. Run `npm run typecheck` before committing.
 8. Load the appropriate Kiro skill before creating or refactoring files to verify
    conventions are met.
+
 

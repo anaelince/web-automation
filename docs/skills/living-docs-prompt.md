@@ -1,12 +1,12 @@
 # Meta-prompt: Living Documentation Enhancement
 
 Apply this prompt to implement commit-time living documentation in an existing
-Playwright + TypeScript project that already has `git-standards` and `automation-architect`
+Playwright + TypeScript project that already has `git-workflow-docs-standard` and `automation-architect`
 skills configured.
 
 **No new skill is created.** Two existing skills are updated and one Kiro hook is added:
 
-1. **`git-standards`** — expand check C4 from "README only" to "README + wiki" detection
+1. **`git-workflow-docs-standard`** — expand check C4 from "README only" to "README + wiki" detection
 2. **`automation-architect`** — expand Mode 5 from "README Sync" to "Docs Sync"
 3. **Kiro hook** — `Stop` trigger that runs the sync automatically after a commit session
 
@@ -103,7 +103,7 @@ Never update a doc to reflect something you have not verified in the code.
 
 ---
 
-## C4 expansion for `git-standards`
+## C4 expansion for `git-workflow-docs-standard`
 
 Replace the existing C4 check with this expanded version.
 
@@ -128,7 +128,7 @@ git diff origin/main...HEAD --name-only
 
 **Output when triggered:**
 ```
-[git-standards] WARNING — DOCS_SYNC
+[git-workflow-docs-standard] WARNING — DOCS_SYNC
   README.md out of sync:        architectural files changed without README update
   → run: "update docs" in automation-architect (Mode 5) to sync
 
@@ -138,7 +138,7 @@ git diff origin/main...HEAD --name-only
 
 **Output when clean:**
 ```
-[git-standards] DOCS_SYNC — ✅ No documentation drift detected
+[git-workflow-docs-standard] DOCS_SYNC — ✅ No documentation drift detected
 ```
 
 ---
@@ -188,7 +188,7 @@ README.md:
   §5 Commands:                      IN SYNC | UPDATED — added 'test:regression'
   §6 Structure:                     IN SYNC | UPDATED — added 'src/api/' folder entry
   §7 Architecture:                  IN SYNC
-  §9 Kiro AI Skills:                IN SYNC | UPDATED — added 'lifecycle-architect' row
+  §9 Kiro AI Skills:                IN SYNC | UPDATED — added 'api-setup-teardown-standard' row
   §10 Git Workflow:                 IN SYNC
 
 Wiki:
@@ -242,3 +242,4 @@ Document these as explicit rules in both skills to prevent doc rot:
 | Keeping docs that describe deleted code | Delete or archive the section immediately |
 | Duplicating README content in the wiki | README = project-level orientation; wiki = layer-level reference. No overlap |
 | Adding "planned features" to wiki | Aspirational content belongs in issues/ADRs, not live docs |
+

@@ -21,10 +21,10 @@ docs/
 |----------|----------|
 | demoqa API Layer reference | [`wiki/api/demoqa-api-layer.md`](wiki/api/demoqa-api-layer.md) |
 | demoqa Book Store test cases | [`test-cases/demoqa/book-store-crud-test-cases.md`](test-cases/demoqa/book-store-crud-test-cases.md) |
-| lifecycle-architect meta-prompt | [`skills/lifecycle-architect-skill-prompt.md`](skills/lifecycle-architect-skill-prompt.md) |
+| api-setup-teardown-standard meta-prompt | [`skills/api-setup-teardown-standard-skill-prompt.md`](skills/api-setup-teardown-standard-skill-prompt.md) |
 | automation-architect meta-prompt | [`skills/automation-architect-skill-prompt.md`](skills/automation-architect-skill-prompt.md) |
 | spec-organisation-standard meta-prompt | [`skills/spec-organisation-standard-prompt.md`](skills/spec-organisation-standard-prompt.md) |
-| spec-quality-standard meta-prompt | [`skills/spec-quality-standard-skill-prompt.md`](skills/spec-quality-standard-skill-prompt.md) |
+| spec-quality-lifecycle-standard meta-prompt | [`skills/spec-quality-lifecycle-standard-skill-prompt.md`](skills/spec-quality-lifecycle-standard-skill-prompt.md) |
 
 ## Conventions
 
@@ -32,3 +32,4 @@ docs/
 - **`skills/`** — updated when a skill is created or its rules change
 - **`test-cases/`** — one subfolder per site (`demoqa/`, `saucedemo/`, `automationexercise/`); one file per feature area
 - **`wiki/`** — living documentation; update alongside code changes; one file per framework layer
+

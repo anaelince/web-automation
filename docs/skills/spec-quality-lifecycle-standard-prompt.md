@@ -1,12 +1,12 @@
-# Meta-prompt: Create new skill `spec-quality-standard`
+# Meta-prompt: Create new skill `spec-quality-lifecycle-standard`
 
 Use this prompt directly with Kiro to create a new skill
-`.kiro/skills/spec-quality-standard/SKILL.md` for any Playwright + TypeScript project.
+`.kiro/skills/spec-quality-lifecycle-standard/SKILL.md` for any Playwright + TypeScript project.
 
 This is a NEW skill — do NOT modify `spec-organisation-standard` or `spec-code-standard`.
 After creating the skill:
-- Register `spec-quality-standard` as a seventh sub-skill in `automation-architect/SKILL.md`
-- Update Mode 1 (Full Pipeline) to run `spec-quality-standard` after `lifecycle-architect`
+- Register `spec-quality-lifecycle-standard` as a seventh sub-skill in `automation-architect/SKILL.md`
+- Update Mode 1 (Full Pipeline) to run `spec-quality-lifecycle-standard` after `api-setup-teardown-standard`
 - Add Mode 7 — TC Quality Review to `automation-architect/SKILL.md`
 - Update the Sub-Skill Registry and Scan Scope Ownership tables
 - Update the Sub-Skill Invocation Reference table
@@ -16,24 +16,24 @@ After creating the skill:
 
 ## Skill overview
 
-`spec-quality-standard` owns the **internal quality of test cases** — what happens inside each
+`spec-quality-lifecycle-standard` owns the **internal quality of test cases** — what happens inside each
 `test()` body. It governs the lifecycle contract (preconditions, postconditions),
 assertion quality, selector resilience, wait strategies, and anti-flakiness patterns.
 
 ### Domain boundary — what this skill does and does NOT cover
 
-| Concern | Owner skill | NOT owned by spec-quality-standard |
+| Concern | Owner skill | NOT owned by spec-quality-lifecycle-standard |
 |---------|-------------|------------------------|
 | TC folder and file naming | `spec-organisation-standard` | ✅ |
 | TC ID format, describe-block naming | `spec-organisation-standard` | ✅ |
 | Import hygiene and fixture registration | `spec-code-standard` | ✅ |
-| Page Object structure and locator getters | `pom-architect` | ✅ |
-| API layer and teardown contract | `lifecycle-architect` | ✅ |
-| **Precondition and postcondition quality** | **`spec-quality-standard`** | — |
-| **Assertion quality and specificity** | **`spec-quality-standard`** | — |
-| **Selector resilience** | **`spec-quality-standard`** | — |
-| **Wait strategies and flakiness prevention** | **`spec-quality-standard`** | — |
-| **Test independence and isolation** | **`spec-quality-standard`** | — |
+| Page Object structure and locator getters | `ui-pom-standard` | ✅ |
+| API layer and teardown contract | `api-setup-teardown-standard` | ✅ |
+| **Precondition and postcondition quality** | **`spec-quality-lifecycle-standard`** | — |
+| **Assertion quality and specificity** | **`spec-quality-lifecycle-standard`** | — |
+| **Selector resilience** | **`spec-quality-lifecycle-standard`** | — |
+| **Wait strategies and flakiness prevention** | **`spec-quality-lifecycle-standard`** | — |
+| **Test independence and isolation** | **`spec-quality-lifecycle-standard`** | — |
 
 ---
 
@@ -58,7 +58,7 @@ Every rule in this skill targets one or more of these root causes explicitly.
 
 ```yaml
 ---
-name: spec-quality-standard
+name: spec-quality-lifecycle-standard
 description: >
   Enforce and auto-apply test case quality standards for Playwright + TypeScript projects.
   Governs preconditions, postconditions, assertion quality, selector resilience, wait
@@ -112,13 +112,13 @@ intermittent failures.
 
 **Output:**
 ```
-[spec-quality-standard] SCAN COMPLETE
+[spec-quality-lifecycle-standard] SCAN COMPLETE
 ─────────────────────────────────────────
 Scanned:  <N> spec files
 Errors:   <N> found — <N> auto-applied
 Warnings: <N> found
 Remaining manual fixes: <list if any, or "none">
-[spec-quality-standard] ✅ All quality rules satisfied.
+[spec-quality-lifecycle-standard] ✅ All quality rules satisfied.
 ```
 
 ---
@@ -467,7 +467,7 @@ await expect(profilePage.bookRowByTitle(firstBookTitle)).toBeVisible(); // ✅ s
 ## Violation Output Format
 
 ```
-[spec-quality-standard] SEVERITY — RULE_NAME
+[spec-quality-lifecycle-standard] SEVERITY — RULE_NAME
 File:  <relative path from project root>
 Line:  <line number>
 Issue: <one sentence describing the problem>
@@ -476,49 +476,49 @@ Fix:   <one sentence describing the fix> | AUTO-APPLIED | MANUAL-FIX
 
 **Examples:**
 ```
-[spec-quality-standard] ERROR — NO_HARDCODED_WAITS
+[spec-quality-lifecycle-standard] ERROR — NO_HARDCODED_WAITS
 File:  tests/ui/smoke/sites/demoqa/books/TC02-add-book-to-collection.spec.ts
 Line:  18
 Issue: page.waitForTimeout(2000) introduces a fixed delay that causes flakiness.
 Fix:   Replace with expect(bookStorePage.pageHeading).toBeVisible(). | AUTO-APPLIED
 
-[spec-quality-standard] ERROR — PRECONDITION_ASSERTED
+[spec-quality-lifecycle-standard] ERROR — PRECONDITION_ASSERTED
 File:  tests/ui/smoke/sites/saucedemo/login/TC0-valid-login.spec.ts
 Line:  5
 Issue: Test begins with an action without first asserting the precondition is met.
 Fix:   Add a first step that asserts the starting state (e.g. login form is visible). | MANUAL-FIX
 
-[spec-quality-standard] ERROR — POSTCONDITION_GUARANTEED
+[spec-quality-lifecycle-standard] ERROR — POSTCONDITION_GUARANTEED
 File:  tests/ui/smoke/sites/demoqa/books/TC02-add-book-to-collection.spec.ts
 Line:  4
 Issue: Test calls addToCollection() without a cleanBookshelf fixture — dirty state leaks.
 Fix:   Add cleanBookshelf to the test parameter list. | MANUAL-FIX
 
-[spec-quality-standard] WARNING — STEP_ASSERTS_RESULT
+[spec-quality-lifecycle-standard] WARNING — STEP_ASSERTS_RESULT
 File:  tests/ui/smoke/sites/demoqa/books/TC02-add-book-to-collection.spec.ts
 Line:  22
 Issue: test.step 'Click Login' performs a navigation but has no assertion confirming it succeeded.
 Fix:   Add expect(bookStoreLoginPage.usernameInput).toBeVisible() or equivalent. | MANUAL-FIX
 
-[spec-quality-standard] ERROR — WEB_FIRST_ASSERTIONS
+[spec-quality-lifecycle-standard] ERROR — WEB_FIRST_ASSERTIONS
 File:  tests/ui/smoke/sites/saucedemo/login/TC0-valid-login.spec.ts
 Line:  12
 Issue: expect(await inventoryPage.secondaryHeader.textContent()).toBe('Products') uses JavaScript-first assertion with no retry.
 Fix:   Replace with expect(inventoryPage.secondaryHeader).toHaveText('Products'). | AUTO-APPLIED
 
-[spec-quality-standard] WARNING — RESILIENT_LOCATORS
+[spec-quality-lifecycle-standard] WARNING — RESILIENT_LOCATORS
 File:  src/ui/pages/sites/demoqa/BookStorePage.ts
 Line:  34
 Issue: Locator uses .nth(0) as the only disambiguation — will break if list order changes.
 Fix:   Scope to a container or use a semantic attribute to identify the first book. | MANUAL-FIX
 
-[spec-quality-standard] ERROR — NO_CONDITIONAL_IN_TEST_BODY
+[spec-quality-lifecycle-standard] ERROR — NO_CONDITIONAL_IN_TEST_BODY
 File:  tests/ui/smoke/sites/demoqa/books/TC02-add-book-to-collection.spec.ts
 Line:  28
 Issue: if/else inside test body makes the test non-deterministic.
 Fix:   Move conditional logic to a Page Object method or fixture. | MANUAL-FIX
 
-[spec-quality-standard] ERROR — NAVIGATE_THEN_ASSERT
+[spec-quality-lifecycle-standard] ERROR — NAVIGATE_THEN_ASSERT
 File:  tests/ui/smoke/sites/demoqa/books/TC02-add-book-to-collection.spec.ts
 Line:  41
 Issue: profilePage.navigate('/profile') is not followed by an assertion confirming the page loaded.
@@ -559,20 +559,20 @@ Fix:   Add expect(profilePage.usernameValue).toBeVisible() immediately after nav
 
    | Skill | Domain | File Scope | Rules / Checks | Added | Status |
    |-------|--------|-----------|----------------|-------|--------|
-   | `spec-quality-standard` | TC body quality · assertions · selectors · wait strategies · flakiness prevention | `tests/**/*.spec.ts` · `src/ui/pages/**/*.ts` | R1–R10 | M7 | Active |
+   | `spec-quality-lifecycle-standard` | TC body quality · assertions · selectors · wait strategies · flakiness prevention | `tests/**/*.spec.ts` · `src/ui/pages/**/*.ts` | R1–R10 | M7 | Active |
 
 2. **Scan Scope Ownership table**: add new rows:
 
    | File / Scope | Owner skill | Concern |
    |--------------|-------------|---------|
-   | `tests/**/*.spec.ts` — preconditions/postconditions | `spec-quality-standard` | R1, R2 |
-   | `tests/**/*.spec.ts` — assertion quality and waits | `spec-quality-standard` | R3, R4, R6, R9, R10 |
-   | `tests/**/*.spec.ts` — test independence | `spec-quality-standard` | R7, R8 |
-   | `src/ui/pages/**/*.ts` — locator resilience | `spec-quality-standard` | R5 |
+   | `tests/**/*.spec.ts` — preconditions/postconditions | `spec-quality-lifecycle-standard` | R1, R2 |
+   | `tests/**/*.spec.ts` — assertion quality and waits | `spec-quality-lifecycle-standard` | R3, R4, R6, R9, R10 |
+   | `tests/**/*.spec.ts` — test independence | `spec-quality-lifecycle-standard` | R7, R8 |
+   | `src/ui/pages/**/*.ts` — locator resilience | `spec-quality-lifecycle-standard` | R5 |
 
-3. **Mode 1 — Full Pipeline**: add step after `lifecycle-architect`:
+3. **Mode 1 — Full Pipeline**: add step after `api-setup-teardown-standard`:
    ```markdown
-   7. Run `spec-quality-standard` on `tests/**/*.spec.ts` and `src/ui/pages/**/*.ts`:
+   7. Run `spec-quality-lifecycle-standard` on `tests/**/*.spec.ts` and `src/ui/pages/**/*.ts`:
       - Detect all TC quality violations
       - Auto-fix every fixable violation (R3, R4)
       - Collect R1, R2, R5–R10 items as manual fixes
@@ -582,11 +582,11 @@ Fix:   Add expect(profilePage.usernameValue).toBeVisible() immediately after nav
    ```
    [automation-architect] PIPELINE COMPLETE
    ─────────────────────────────────────────
-   pom-architect:        X violations found — Y auto-applied
+   ui-pom-standard:        X violations found — Y auto-applied
    spec-code-standard:       X violations found — Y auto-applied
    spec-organisation-standard:       X violations found — Y auto-applied
-   lifecycle-architect:  X violations found — Y auto-applied
-   spec-quality-standard:           X violations found — Y auto-applied
+   api-setup-teardown-standard:  X violations found — Y auto-applied
+   spec-quality-lifecycle-standard:           X violations found — Y auto-applied
    Remaining manual fixes: <list if any, or "none">
    [automation-architect] ✅ All rules satisfied.
    ```
@@ -604,13 +604,13 @@ Fix:   Add expect(profilePage.usernameValue).toBeVisible() immediately after nav
    intermittent failures. Also run before every PR that includes new or modified specs.
 
    **Steps:**
-   1. Load and invoke `spec-quality-standard`
+   1. Load and invoke `spec-quality-lifecycle-standard`
    2. Determine mode:
       - Single file provided → Enforce on that file only
       - No file provided → Enforce on all `tests/**/*.spec.ts`
    3. Forward all output verbatim
 
-   **Note:** Load `spec-quality-standard` directly for standalone TC review without activating
+   **Note:** Load `spec-quality-lifecycle-standard` directly for standalone TC review without activating
    the hub.
    ```
 
@@ -618,5 +618,6 @@ Fix:   Add expect(profilePage.usernameValue).toBeVisible() immediately after nav
 
    | Goal | Skill to load | Trigger phrase example |
    |------|---------------|------------------------|
-   | Review TC quality and anti-flakiness patterns | `spec-quality-standard` | `"review tc quality"` |
+   | Review TC quality and anti-flakiness patterns | `spec-quality-lifecycle-standard` | `"review tc quality"` |
+
 

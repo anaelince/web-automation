@@ -10,7 +10,7 @@ with the current state of the project.
 **Important:** After this initial rewrite, the README is maintained automatically:
 - `automation-architect` **Mode 5 — README Sync** detects and updates out-of-date
   sections whenever triggered with "update readme"
-- `git-standards` **C4 — README_SYNC** warns during PR validation if architectural
+- `git-workflow-docs-standard` **C4 — README_SYNC** warns during PR validation if architectural
   files changed but README was not updated in the branch
 
 The sections below are marked as **[AUTO]** (tracked by Mode 5) or **[MANUAL]**
@@ -48,7 +48,7 @@ Update to reflect the actual tools needed today:
 
 - Node.js (LTS) — exact version used in the project if available
 - npm
-- Git + GitHub CLI (`gh`) — required for git-standards workflow
+- Git + GitHub CLI (`gh`) — required for git-workflow-docs-standard workflow
 - Visual Studio Code or **Kiro IDE** (recommended — required to use AI skills)
 - Playwright browsers (installed via `npx playwright install`)
 - Basic TypeScript knowledge
@@ -135,10 +135,10 @@ web-automation/
 ├── .kiro/
 │   └── skills/                   # Kiro AI skill definitions
 │       ├── automation-architect/ # Hub — orchestrates all sub-skills
-│       ├── pom-architect/        # Page Object Model rules
+│       ├── ui-pom-standard/        # Page Object Model rules
 │       ├── spec-code-standard/       # Spec code quality rules
 │       ├── spec-organisation-standard/       # Spec organisation and TC naming rules
-│       └── git-standards/        # Git workflow conventions and execution
+│       └── git-workflow-docs-standard/        # Git workflow conventions and execution
 │
 ├── .env.example                  # Environment variable template
 ├── playwright.config.ts          # Playwright configuration
@@ -215,10 +215,10 @@ and apply the framework's conventions automatically.
 
 | Skill | Purpose | Load when... |
 |-------|---------|--------------|
-| `pom-architect` | Enforces Page Object Model rules | Creating or reviewing Page Objects |
+| `ui-pom-standard` | Enforces Page Object Model rules | Creating or reviewing Page Objects |
 | `spec-code-standard` | Enforces spec code quality | Writing or reviewing spec files |
 | `spec-organisation-standard` | Enforces TC folder structure and naming | Creating or reorganising test cases |
-| `git-standards` | Validates and executes git workflow | Before committing, pushing, or opening a PR |
+| `git-workflow-docs-standard` | Validates and executes git workflow | Before committing, pushing, or opening a PR |
 | `automation-architect` | Orchestrates all skills (hub) | Full architecture review or scaffolding a new page |
 
 **Example usage in Kiro chat:**
@@ -238,11 +238,11 @@ and apply the framework's conventions automatically.
 
 ---
 
-### Section 10 — Git Workflow `[AUTO — source: git-standards SKILL.md]`
+### Section 10 — Git Workflow `[AUTO — source: git-workflow-docs-standard SKILL.md]`
 
-New section. Reference the `git-standards` skill conventions.
+New section. Reference the `git-workflow-docs-standard` skill conventions.
 
-This project follows a structured git workflow enforced by the `git-standards` skill.
+This project follows a structured git workflow enforced by the `git-workflow-docs-standard` skill.
 
 **Branch naming:**
 ```
@@ -269,12 +269,12 @@ Examples:
 
 Every branch must contain at least one `feat` or `fix` commit before opening a PR.
 
-Run `git-standards` (load the skill in Kiro and say `"check git"`) before every PR.
-If architectural files changed in your branch, `git-standards` will warn you to run
+Run `git-workflow-docs-standard` (load the skill in Kiro and say `"check git"`) before every PR.
+If architectural files changed in your branch, `git-workflow-docs-standard` will warn you to run
 `"update readme"` in `automation-architect` before pushing.
 
 > **Note for maintainers:** This section is auto-updated by `automation-architect`
-> Mode 5 — README Sync when branch patterns or commit types change in `git-standards`.
+> Mode 5 — README Sync when branch patterns or commit types change in `git-workflow-docs-standard`.
 
 ---
 
@@ -315,4 +315,5 @@ Update to reflect M5 conventions:
 - Tables for structured information (commands, skills, modules)
 - Assume the reader is a learner who has cloned the repo and is following the course
 - Do not describe future planned features as if they already exist
+
 

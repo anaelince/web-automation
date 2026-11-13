@@ -11,7 +11,7 @@ Create a Kiro skill system for a Playwright + TypeScript test automation project
 ### Skill system overview
 
 Three skills:
-1. `pom-architect` — enforces Page Object Model rules
+1. `ui-pom-standard` — enforces Page Object Model rules
 2. `spec-code-standard` — enforces test writing and organisation rules
 3. `automation-architect` — hub that orchestrates the other two
 
@@ -29,9 +29,9 @@ Each skill must:
 
 ---
 
-## Skill 1: pom-architect
+## Skill 1: ui-pom-standard
 
-**File:** `.kiro/skills/pom-architect/SKILL.md`
+**File:** `.kiro/skills/ui-pom-standard/SKILL.md`
 
 **Frontmatter description:**
 > Enforce and auto-apply Page Object Model rules for Playwright + TypeScript projects. Detects violations and fixes them: locators as getters, actions as async methods, no direct page usage in test bodies, assertions only in specs, navigate() using baseURL. Load when creating, reviewing, or refactoring Page Objects or spec files.
@@ -158,7 +158,7 @@ Each skill must:
 **File:** `.kiro/skills/automation-architect/SKILL.md`
 
 **Frontmatter description:**
-> Hub skill that orchestrates pom-architect and spec-code-standard for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, or to scaffold new Page Objects, fixtures, and spec files following all agreed patterns. Invoke sub-skills independently for targeted checks.
+> Hub skill that orchestrates ui-pom-standard and spec-code-standard for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, or to scaffold new Page Objects, fixtures, and spec files following all agreed patterns. Invoke sub-skills independently for targeted checks.
 
 ---
 
@@ -191,7 +191,7 @@ These rules are enforced by the team, not by the skill itself. They must appear 
 - Triggered by: "aplicar arquitectura", "apply architecture", "full review", "enforce all rules"
 - Steps:
   1. Identify all relevant files (specs, POs, fixtures, data files)
-  2. Run `pom-architect` — detect + auto-fix all POM violations
+  2. Run `ui-pom-standard` — detect + auto-fix all POM violations
   3. Run `spec-code-standard` — detect + auto-fix all test writing violations
   4. Output unified summary
 
@@ -219,7 +219,7 @@ Full pipeline:
 ```
 [automation-architect] PIPELINE COMPLETE
 ─────────────────────────────────────────
-pom-architect:    X violations found — Y auto-applied
+ui-pom-standard:    X violations found — Y auto-applied
 spec-code-standard:   X violations found — Y auto-applied
 Remaining manual fixes: <list if any>
 [automation-architect] ✅ All rules satisfied.
@@ -244,4 +244,5 @@ Created:  tests/<name>.spec.ts
 - `src/config/Env.ts` validates all required env vars at startup with descriptive errors
 - `src/data/auth.data.ts` defines test users: `appUser` (from Env), plus site-specific accounts
 - Path aliases are the only allowed import style — relative paths are always a violation
+
 

@@ -1,15 +1,15 @@
-# Meta-prompt: Create new skill git-standards + add Mode 4 to automation-architect
+# Meta-prompt: Create new skill git-workflow-docs-standard + add Mode 4 to automation-architect
 
 Use this prompt directly with Kiro to:
-1. Create a new independent skill `.kiro/skills/git-standards/SKILL.md`
+1. Create a new independent skill `.kiro/skills/git-workflow-docs-standard/SKILL.md`
 2. Add Mode 4 to `.kiro/skills/automation-architect/SKILL.md` as a thin wrapper
-   that delegates to `git-standards`
+   that delegates to `git-workflow-docs-standard`
 
 The skill has two capabilities:
 - **Validate** — read-only check of branch and commit conventions
 - **Execute** — performs git operations (branch, commit, push, PR) following conventions
 
-Do NOT modify `pom-architect`, `spec-code-standard`, or `spec-organisation-standard`.
+Do NOT modify `ui-pom-standard`, `spec-code-standard`, or `spec-organisation-standard`.
 
 ---
 
@@ -17,7 +17,7 @@ Do NOT modify `pom-architect`, `spec-code-standard`, or `spec-organisation-stand
 
 ### Step 1 — Create the skill file
 
-Create `.kiro/skills/git-standards/SKILL.md` with the following content.
+Create `.kiro/skills/git-workflow-docs-standard/SKILL.md` with the following content.
 
 ---
 
@@ -25,7 +25,7 @@ Create `.kiro/skills/git-standards/SKILL.md` with the following content.
 
 ```yaml
 ---
-name: git-standards
+name: git-workflow-docs-standard
 description: >
   Enforce and execute git workflow conventions for Playwright + TypeScript projects.
   Two capabilities: Validate (read-only check of branch name, commit format, type
@@ -176,7 +176,7 @@ The developer decides whether the change is significant enough to document.
 ### Validate output format
 
 ```
-[git-standards] VALIDATE
+[git-workflow-docs-standard] VALIDATE
 ──────────────────────────────────────
 Branch name:      PASS | VIOLATION — <detail>
 Commit format:    <N> valid / <N> invalid
@@ -189,9 +189,9 @@ README sync:      IN SYNC | WARNING
                   — architectural files changed but README.md was not modified
                   — run "update readme" in automation-architect (Mode 5) to sync
 ──────────────────────────────────────
-[git-standards] ✅ Conventions valid — ready to push / open PR.
+[git-workflow-docs-standard] ✅ Conventions valid — ready to push / open PR.
              OR
-[git-standards] ⚠️  <N> issue(s) found — resolve before proceeding.
+[git-workflow-docs-standard] ⚠️  <N> issue(s) found — resolve before proceeding.
 ```
 
 ### Fix guidance (included in output when violations exist)
@@ -238,7 +238,7 @@ conventions before executing. Stops and reports if validation fails.
 
 **Output:**
 ```
-[git-standards] BRANCH CREATED
+[git-workflow-docs-standard] BRANCH CREATED
 Branch: test/tc8-verify-products
 ```
 
@@ -274,7 +274,7 @@ Branch: test/tc8-verify-products
 
 **Output:**
 ```
-[git-standards] COMMIT CREATED
+[git-workflow-docs-standard] COMMIT CREATED
 Message: feat(tc8): add products page verification
 Files staged: tests/ui/smoke/products/TC8-verify-all-products-and-detail.spec.ts
               src/ui/pages/ProductsPage.ts
@@ -303,7 +303,7 @@ Files staged: tests/ui/smoke/products/TC8-verify-all-products-and-detail.spec.ts
 
 **Output:**
 ```
-[git-standards] PUSHED
+[git-workflow-docs-standard] PUSHED
 Branch: test/tc8-verify-products → origin/test/tc8-verify-products
 ```
 
@@ -347,7 +347,7 @@ Branch: test/tc8-verify-products → origin/test/tc8-verify-products
 
 **Output:**
 ```
-[git-standards] PR CREATED
+[git-workflow-docs-standard] PR CREATED
 Title:  feat(tc8): add products page verification
 URL:    https://github.com/{owner}/{repo}/pull/{number}
 ```
@@ -368,13 +368,13 @@ Runs the complete sequence: validate → commit → push → PR.
 
 **Output:**
 ```
-[git-standards] WORKFLOW COMPLETE
+[git-workflow-docs-standard] WORKFLOW COMPLETE
 ──────────────────────────────────────
 Committed:  feat(tc8): add products page verification
 Pushed:     test/tc8-verify-products → origin
 PR:         https://github.com/{owner}/{repo}/pull/{number}
 ──────────────────────────────────────
-[git-standards] ✅ Work submitted — ready for review.
+[git-workflow-docs-standard] ✅ Work submitted — ready for review.
 ```
 
 ---
@@ -384,7 +384,7 @@ PR:         https://github.com/{owner}/{repo}/pull/{number}
 Append the following after Mode 3. Update the mode-slot comment in the `## Modes`
 section header to `(4 of 10 slots used)`.
 
-Also add `git-standards (git workflow conventions)` to the sub-skills list in the
+Also add `git-workflow-docs-standard (git workflow conventions)` to the sub-skills list in the
 Project Context section.
 
 ---
@@ -396,10 +396,10 @@ Project Context section.
 **When to use:** For any git operation — pre-PR validation or full commit/push/PR workflow.
 
 **Steps:**
-1. Load and invoke `git-standards`
+1. Load and invoke `git-workflow-docs-standard`
 2. Forward all output verbatim
 
-**Note:** Load `git-standards` directly for standalone git work without activating the hub.
+**Note:** Load `git-workflow-docs-standard` directly for standalone git work without activating the hub.
 
 ---
 
@@ -409,5 +409,6 @@ Add a new row to the existing table in `automation-architect/SKILL.md`:
 
 | Goal | Skill to load | Trigger phrase example |
 |------|---------------|------------------------|
-| Validate git conventions or run full git workflow | `git-standards` | `"check git"` / `"git workflow"` |
+| Validate git conventions or run full git workflow | `git-workflow-docs-standard` | `"check git"` / `"git workflow"` |
+
 
