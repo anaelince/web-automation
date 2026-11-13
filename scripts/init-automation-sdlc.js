@@ -4,59 +4,67 @@
  * automation-sdlc --init
  *
  * Bootstraps the AI Automation SDLC configuration into a target project.
- * Copies .kiro/skills/, .kiro/steering/, .kiro/hooks/ and the docs/skills/
- * governance documents from this repo template into the target directory.
+ * Supports Kiro, Claude Code, or both agents via the --agent flag.
  *
  * Usage:
- *   node scripts/init-automation-sdlc.js [target-dir]
- *   node scripts/init-automation-sdlc.js ../my-new-project
- *   node scripts/init-automation-sdlc.js  (defaults to current directory)
+ *   node scripts/init-automation-sdlc.js [target-dir] [--agent=kiro|claude|both]
+ *
+ *   node scripts/init-automation-sdlc.js ../my-project --agent=both   (default)
+ *   node scripts/init-automation-sdlc.js ../my-project --agent=kiro
+ *   node scripts/init-automation-sdlc.js ../my-project --agent=claude
  *
  * Future:
- *   npx automation-sdlc init [target-dir]
+ *   npx automation-sdlc init [target-dir] [--agent=...]
  */
 
 const fs   = require('fs');
 const path = require('path');
 
-// ── Paths ─────────────────────────────────────────────────────────────────────
+// ── Args ──────────────────────────────────────────────────────────────────────
 
 const REPO_ROOT  = path.resolve(__dirname, '..');
-const TARGET_DIR = process.argv[2]
-  ? path.resolve(process.argv[2])
-  : process.cwd();
+const positional = process.argv.slice(2).filter(a => !a.startsWith('--'));
+const TARGET_DIR = positional[0] ? path.resolve(positional[0]) : process.cwd();
+
+const agentFlag  = process.argv.find(a => a.startsWith('--agent='));
+const AGENT      = agentFlag ? agentFlag.split('=')[1] : 'both';
+
+if (!['kiro', 'claude', 'both'].includes(AGENT)) {
+  console.error(`  ✖  Unknown --agent="${AGENT}". Use: kiro | claude | both`);
+  process.exit(1);
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function ensureDir(dir) {
-  fs.mkdirSync(dir, { recursive: true });
-}
+function ensureDir(dir) { fs.mkdirSync(dir, { recursive: true }); }
 
-function copyFile(src, dest) {
+function copyFileTo(src, dest) {
   ensureDir(path.dirname(dest));
   fs.copyFileSync(src, dest);
 }
 
-function copyDir(src, dest, { exclude = [] } = {}) {
+function copyDir(src, dest) {
   if (!fs.existsSync(src)) return [];
-  const entries = fs.readdirSync(src, { withFileTypes: true });
   const copied = [];
-  for (const entry of entries) {
-    if (exclude.includes(entry.name)) continue;
-    const srcPath  = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
-    if (entry.isDirectory()) {
-      copied.push(...copyDir(srcPath, destPath, { exclude }));
-    } else {
-      copyFile(srcPath, destPath);
-      copied.push(destPath.replace(TARGET_DIR + path.sep, ''));
-    }
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const s = path.join(src, entry.name);
+    const d = path.join(dest, entry.name);
+    if (entry.isDirectory()) copied.push(...copyDir(s, d));
+    else { copyFileTo(s, d); copied.push(d.replace(TARGET_DIR + path.sep, '')); }
   }
   return copied;
 }
 
-function log(icon, msg) {
-  console.log(`  ${icon}  ${msg}`);
+function copyOne(src, dest, label) {
+  if (!fs.existsSync(src)) { console.log(`  ⚠  Missing: ${label}`); return; }
+  if (fs.existsSync(dest)) {
+    console.log(`  –  ${label} (already exists — skipped)`);
+    results.skipped.push(label);
+  } else {
+    copyFileTo(src, dest);
+    console.log(`  ✓  ${label}`);
+    results.created.push(label);
+  }
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -64,7 +72,8 @@ function log(icon, msg) {
 console.log('\n╔══════════════════════════════════════════════════════╗');
 console.log('║   AI Automation SDLC — Initialiser                  ║');
 console.log('╚══════════════════════════════════════════════════════╝\n');
-console.log(`  Target: ${TARGET_DIR}\n`);
+console.log(`  Target: ${TARGET_DIR}`);
+console.log(`  Agent:  ${AGENT}\n`);
 
 if (!fs.existsSync(TARGET_DIR)) {
   console.error(`  ✖  Target directory does not exist: ${TARGET_DIR}`);
@@ -73,99 +82,89 @@ if (!fs.existsSync(TARGET_DIR)) {
 
 const results = { created: [], skipped: [] };
 
-// ── 1. .kiro/skills/ ─────────────────────────────────────────────────────────
+// ── KIRO LAYER ────────────────────────────────────────────────────────────────
 
-console.log('  [1/4] Skills...');
-const skillsSrc  = path.join(REPO_ROOT, '.kiro', 'skills');
-const skillsDest = path.join(TARGET_DIR, '.kiro', 'skills');
+if (AGENT === 'kiro' || AGENT === 'both') {
 
-if (!fs.existsSync(skillsSrc)) {
-  log('⚠', 'No .kiro/skills/ found in source repo — skipping');
-} else {
-  const copied = copyDir(skillsSrc, skillsDest);
-  copied.forEach(f => log('✓', f));
-  results.created.push(...copied);
+  console.log('  ── Kiro ──────────────────────────────────────────────');
+
+  // 1. Skills
+  console.log('\n  [kiro 1/4] Skills...');
+  const kiroSkills = copyDir(
+    path.join(REPO_ROOT, '.kiro', 'skills'),
+    path.join(TARGET_DIR, '.kiro', 'skills'),
+  );
+  kiroSkills.forEach(f => { console.log(`  ✓  ${f}`); results.created.push(f); });
+
+  // 2. Steering
+  console.log('\n  [kiro 2/4] Steering files...');
+  const kiroSteering = copyDir(
+    path.join(REPO_ROOT, '.kiro', 'steering'),
+    path.join(TARGET_DIR, '.kiro', 'steering'),
+  );
+  kiroSteering.forEach(f => { console.log(`  ✓  ${f}`); results.created.push(f); });
+
+  // 3. Hooks
+  console.log('\n  [kiro 3/4] Hooks...');
+  const kiroHooks = copyDir(
+    path.join(REPO_ROOT, '.kiro', 'hooks'),
+    path.join(TARGET_DIR, '.kiro', 'hooks'),
+  );
+  kiroHooks.forEach(f => { console.log(`  ✓  ${f}`); results.created.push(f); });
+
+  // 4. MCP example
+  console.log('\n  [kiro 4/4] MCP example config...');
+  copyOne(
+    path.join(__dirname, 'templates', 'mcp.example.json'),
+    path.join(TARGET_DIR, '.kiro', 'settings', 'mcp.example.json'),
+    '.kiro/settings/mcp.example.json',
+  );
 }
 
-// ── 2. .kiro/steering/ ───────────────────────────────────────────────────────
+// ── CLAUDE LAYER ──────────────────────────────────────────────────────────────
 
-console.log('\n  [2/4] Steering files...');
-const steeringSrc  = path.join(REPO_ROOT, '.kiro', 'steering');
-const steeringDest = path.join(TARGET_DIR, '.kiro', 'steering');
+if (AGENT === 'claude' || AGENT === 'both') {
 
-if (!fs.existsSync(steeringSrc)) {
-  log('⚠', 'No .kiro/steering/ found in source repo — skipping');
-} else {
-  const copied = copyDir(steeringSrc, steeringDest);
-  copied.forEach(f => log('✓', f));
-  results.created.push(...copied);
+  console.log('\n  ── Claude ────────────────────────────────────────────');
+
+  // 1. CLAUDE.md
+  console.log('\n  [claude 1/2] CLAUDE.md...');
+  copyOne(
+    path.join(REPO_ROOT, 'CLAUDE.md'),
+    path.join(TARGET_DIR, 'CLAUDE.md'),
+    'CLAUDE.md',
+  );
+
+  // 2. Claude skill reference
+  console.log('\n  [claude 2/2] docs/agents/claude/...');
+  const claudeAgents = copyDir(
+    path.join(REPO_ROOT, 'docs', 'agents', 'claude'),
+    path.join(TARGET_DIR, 'docs', 'agents', 'claude'),
+  );
+  claudeAgents.forEach(f => { console.log(`  ✓  ${f}`); results.created.push(f); });
 }
 
-// ── 3. .kiro/hooks/ ──────────────────────────────────────────────────────────
+// ── SHARED DOCS ───────────────────────────────────────────────────────────────
 
-console.log('\n  [3/4] Hooks...');
-const hooksSrc  = path.join(REPO_ROOT, '.kiro', 'hooks');
-const hooksDest = path.join(TARGET_DIR, '.kiro', 'hooks');
+console.log('\n  ── Shared docs ───────────────────────────────────────');
+console.log('\n  [docs] Governance + skill prompts...');
 
-if (!fs.existsSync(hooksSrc)) {
-  log('⚠', 'No .kiro/hooks/ found in source repo — skipping');
-} else {
-  const copied = copyDir(hooksSrc, hooksDest);
-  copied.forEach(f => log('✓', f));
-  results.created.push(...copied);
-}
-
-// ── 4. docs/ governance ──────────────────────────────────────────────────────
-
-console.log('\n  [4/5] Docs (skills prompts + governance)...');
-
-const docTargets = [
-  // AI governance wiki
-  { src: path.join(REPO_ROOT, 'docs', 'wiki', 'ai-governance.md'),
-    dest: path.join(TARGET_DIR, 'docs', 'wiki', 'ai-governance.md') },
-  // Init script reference
-  { src: path.join(REPO_ROOT, 'docs', 'wiki', 'init-script.md'),
-    dest: path.join(TARGET_DIR, 'docs', 'wiki', 'init-script.md') },
-  // ADR-001 naming convention
-  { src: path.join(REPO_ROOT, 'docs', 'decisions', 'ADR-001-skill-naming-convention.md'),
-    dest: path.join(TARGET_DIR, 'docs', 'decisions', 'ADR-001-skill-naming-convention.md') },
-  // All skill prompts
+const sharedDocs = [
+  ['docs/wiki/ai-governance.md'],
+  ['docs/wiki/init-script.md'],
+  ['docs/wiki/dual-agent-setup.md'],
+  ['docs/decisions/ADR-001-skill-naming-convention.md'],
   ...fs.readdirSync(path.join(REPO_ROOT, 'docs', 'skills'))
       .filter(f => f.endsWith('.md'))
-      .map(f => ({
-        src:  path.join(REPO_ROOT, 'docs', 'skills', f),
-        dest: path.join(TARGET_DIR, 'docs', 'skills', f),
-      })),
+      .map(f => [`docs/skills/${f}`]),
 ];
 
-for (const { src, dest } of docTargets) {
-  if (!fs.existsSync(src)) { log('⚠', `Missing: ${src}`); continue; }
-  const rel = dest.replace(TARGET_DIR + path.sep, '');
-  if (fs.existsSync(dest)) {
-    log('–', `${rel} (already exists — skipped)`);
-    results.skipped.push(rel);
-  } else {
-    copyFile(src, dest);
-    log('✓', rel);
-    results.created.push(rel);
-  }
-}
-
-// ── 5. MCP example config ─────────────────────────────────────────────────────
-
-console.log('\n  [5/5] MCP example config...');
-const mcpExampleSrc  = path.join(__dirname, 'templates', 'mcp.example.json');
-const mcpExampleDest = path.join(TARGET_DIR, '.kiro', 'settings', 'mcp.example.json');
-
-if (fs.existsSync(mcpExampleSrc)) {
-  if (fs.existsSync(mcpExampleDest)) {
-    log('–', '.kiro/settings/mcp.example.json (already exists — skipped)');
-    results.skipped.push('.kiro/settings/mcp.example.json');
-  } else {
-    copyFile(mcpExampleSrc, mcpExampleDest);
-    log('✓', '.kiro/settings/mcp.example.json');
-    results.created.push('.kiro/settings/mcp.example.json');
-  }
+for (const [rel] of sharedDocs) {
+  copyOne(
+    path.join(REPO_ROOT, rel),
+    path.join(TARGET_DIR, rel),
+    rel,
+  );
 }
 
 // ── Summary ───────────────────────────────────────────────────────────────────
@@ -173,14 +172,21 @@ if (fs.existsSync(mcpExampleSrc)) {
 console.log('\n╔══════════════════════════════════════════════════════╗');
 console.log('║   Summary                                            ║');
 console.log('╚══════════════════════════════════════════════════════╝');
-console.log(`\n  Created: ${results.created.length} files`);
+console.log(`\n  Agent:   ${AGENT}`);
+console.log(`  Created: ${results.created.length} files`);
 console.log(`  Skipped: ${results.skipped.length} files (already exist)`);
-
 console.log('\n  Next steps:');
-console.log('  1. Open the target project in Kiro IDE');
-console.log('  2. The skills, steering, and hooks are ready to use');
-console.log('  3. Run "apply architecture" in Kiro chat to verify the setup');
-console.log('  4. Read docs/wiki/ai-governance.md for governance conventions');
-console.log('  5. Adapt framework-*.md steering files to your project stack');
-console.log('  6. Copy .kiro/settings/mcp.example.json → mcp.json and configure MCP servers');
-console.log('  7. See docs/wiki/init-script.md for full configuration checklist\n');
+if (AGENT === 'kiro' || AGENT === 'both') {
+  console.log('  Kiro:');
+  console.log('    1. Open the target project in Kiro IDE');
+  console.log('    2. Run "apply architecture" to verify the setup');
+  console.log('    3. Adapt framework-*.md steering files to your project stack');
+  console.log('    4. Copy .kiro/settings/mcp.example.json → mcp.json');
+}
+if (AGENT === 'claude' || AGENT === 'both') {
+  console.log('  Claude:');
+  console.log('    1. Open the target project in Claude Code');
+  console.log('    2. CLAUDE.md is auto-loaded — say "apply architecture" to verify');
+  console.log('    3. For full skill rules: @docs/agents/claude/skill-reference.md');
+}
+console.log('\n  Read docs/wiki/dual-agent-setup.md for the full setup guide\n');
