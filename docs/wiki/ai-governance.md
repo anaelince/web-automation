@@ -133,7 +133,7 @@ that are short (<50 lines) and always relevant.
 | File | Inclusion | Purpose |
 |---|---|---|
 | `project-context.md` | `always` | Project conventions (English, no Azure DevOps, secrets out of git) |
-| `framework-reference.md` | `manual` | **Orchestrator** — loads all four framework steering files at once via `#[[file:...]]` |
+| `framework-reference.md` | `manual` | **Orchestrator** — loads all four framework steering files at once via `#[[file:.kiro/steering/...]]` |
 | `framework-path-aliases.md` | `manual` | Full alias map with site-based path patterns |
 | `framework-playwright-config.md` | `manual` | playwright.config.ts settings + npm scripts |
 | `framework-tech-stack.md` | `manual` | Dependency versions and TypeScript compiler settings |
