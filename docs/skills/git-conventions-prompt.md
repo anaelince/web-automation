@@ -9,7 +9,7 @@ The skill has two capabilities:
 - **Validate** — read-only check of branch and commit conventions
 - **Execute** — performs git operations (branch, commit, push, PR) following conventions
 
-Do NOT modify `pom-architect`, `test-standards`, or `spec-standards`.
+Do NOT modify `pom-architect`, `spec-code-standard`, or `spec-organisation-standard`.
 
 ---
 
@@ -410,3 +410,4 @@ Add a new row to the existing table in `automation-architect/SKILL.md`:
 | Goal | Skill to load | Trigger phrase example |
 |------|---------------|------------------------|
 | Validate git conventions or run full git workflow | `git-standards` | `"check git"` / `"git workflow"` |
+

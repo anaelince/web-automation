@@ -136,8 +136,8 @@ web-automation/
 │   └── skills/                   # Kiro AI skill definitions
 │       ├── automation-architect/ # Hub — orchestrates all sub-skills
 │       ├── pom-architect/        # Page Object Model rules
-│       ├── test-standards/       # Spec code quality rules
-│       ├── spec-standards/       # Spec organisation and TC naming rules
+│       ├── spec-code-standard/       # Spec code quality rules
+│       ├── spec-organisation-standard/       # Spec organisation and TC naming rules
 │       └── git-standards/        # Git workflow conventions and execution
 │
 ├── .env.example                  # Environment variable template
@@ -216,8 +216,8 @@ and apply the framework's conventions automatically.
 | Skill | Purpose | Load when... |
 |-------|---------|--------------|
 | `pom-architect` | Enforces Page Object Model rules | Creating or reviewing Page Objects |
-| `test-standards` | Enforces spec code quality | Writing or reviewing spec files |
-| `spec-standards` | Enforces TC folder structure and naming | Creating or reorganising test cases |
+| `spec-code-standard` | Enforces spec code quality | Writing or reviewing spec files |
+| `spec-organisation-standard` | Enforces TC folder structure and naming | Creating or reorganising test cases |
 | `git-standards` | Validates and executes git workflow | Before committing, pushing, or opening a PR |
 | `automation-architect` | Orchestrates all skills (hub) | Full architecture review or scaffolding a new page |
 
@@ -315,3 +315,4 @@ Update to reflect M5 conventions:
 - Tables for structured information (commands, skills, modules)
 - Assume the reader is a learner who has cloned the repo and is following the course
 - Do not describe future planned features as if they already exist
+

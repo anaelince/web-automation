@@ -12,7 +12,7 @@ Create a Kiro skill system for a Playwright + TypeScript test automation project
 
 Three skills:
 1. `pom-architect` — enforces Page Object Model rules
-2. `test-standards` — enforces test writing and organisation rules
+2. `spec-code-standard` — enforces test writing and organisation rules
 3. `automation-architect` — hub that orchestrates the other two
 
 Each skill must:
@@ -90,7 +90,7 @@ Each skill must:
 8. **No hardcoded credentials or test data in Page Objects** — Parametrize or use data files.
    - Auto-fix: Replace hardcoded values with parameters.
 
-**File:** `.kiro/skills/test-standards/SKILL.md`
+**File:** `.kiro/skills/spec-code-standard/SKILL.md`
 
 **Frontmatter description:**
 > Enforce and auto-apply test writing and organisation standards for Playwright + TypeScript projects. Covers import hygiene (path aliases), fixture pattern, test structure, test independence, and data hygiene. Load when writing, reviewing, or refactoring spec files or fixture files.
@@ -158,7 +158,7 @@ Each skill must:
 **File:** `.kiro/skills/automation-architect/SKILL.md`
 
 **Frontmatter description:**
-> Hub skill that orchestrates pom-architect and test-standards for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, or to scaffold new Page Objects, fixtures, and spec files following all agreed patterns. Invoke sub-skills independently for targeted checks.
+> Hub skill that orchestrates pom-architect and spec-code-standard for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, or to scaffold new Page Objects, fixtures, and spec files following all agreed patterns. Invoke sub-skills independently for targeted checks.
 
 ---
 
@@ -192,7 +192,7 @@ These rules are enforced by the team, not by the skill itself. They must appear 
 - Steps:
   1. Identify all relevant files (specs, POs, fixtures, data files)
   2. Run `pom-architect` — detect + auto-fix all POM violations
-  3. Run `test-standards` — detect + auto-fix all test writing violations
+  3. Run `spec-code-standard` — detect + auto-fix all test writing violations
   4. Output unified summary
 
 **Mode 2 — Structure only**
@@ -220,7 +220,7 @@ Full pipeline:
 [automation-architect] PIPELINE COMPLETE
 ─────────────────────────────────────────
 pom-architect:    X violations found — Y auto-applied
-test-standards:   X violations found — Y auto-applied
+spec-code-standard:   X violations found — Y auto-applied
 Remaining manual fixes: <list if any>
 [automation-architect] ✅ All rules satisfied.
 ```
@@ -244,3 +244,4 @@ Created:  tests/<name>.spec.ts
 - `src/config/Env.ts` validates all required env vars at startup with descriptive errors
 - `src/data/auth.data.ts` defines test users: `appUser` (from Env), plus site-specific accounts
 - Path aliases are the only allowed import style — relative paths are always a violation
+

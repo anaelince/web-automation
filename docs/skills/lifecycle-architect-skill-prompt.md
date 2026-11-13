@@ -3,9 +3,9 @@
 Use this prompt directly with Kiro to create a new skill
 `.kiro/skills/lifecycle-architect/SKILL.md` for any Playwright + TypeScript project.
 
-This is a NEW skill — do NOT modify `test-standards`. After creating the skill:
+This is a NEW skill — do NOT modify `spec-code-standard`. After creating the skill:
 - Register `lifecycle-architect` as a fifth sub-skill in `automation-architect/SKILL.md`
-- Update Mode 1 (Full Pipeline) to run `lifecycle-architect` after `spec-standards`
+- Update Mode 1 (Full Pipeline) to run `lifecycle-architect` after `spec-organisation-standard`
 - Add Mode 6 — Lifecycle Infrastructure to `automation-architect/SKILL.md`
 - Update the Sub-Skill Registry and Scan Scope Ownership tables
 - Update the Sub-Skill Invocation Reference table
@@ -22,8 +22,8 @@ ensuring tests are deterministic, parallel-safe, and portable across environment
 | Skill | Domain |
 |-------|--------|
 | `pom-architect` | Page Object layer structure |
-| `test-standards` | Spec code quality — imports, fixtures, credentials, framework |
-| `spec-standards` | Spec organisation — folder hierarchy, file naming, TC IDs, steps |
+| `spec-code-standard` | Spec code quality — imports, fixtures, credentials, framework |
+| `spec-organisation-standard` | Spec organisation — folder hierarchy, file naming, TC IDs, steps |
 | `git-standards` | Git workflow conventions |
 | `lifecycle-architect` | API layer structure · setup/teardown infrastructure · mocking |
 
@@ -339,7 +339,7 @@ for a new resource that has no existing API support.
 - Add a controller fixture (setup-only, for read operations)
 - Add a data fixture with teardown if create/delete operations exist
 - All imports via `@api/*` and `@fixtures/*`
-- Run `test-standards` on `src/fixtures/index.ts` after update — assert zero violations
+- Run `spec-code-standard` on `src/fixtures/index.ts` after update — assert zero violations
 
 **Output:**
 ```
@@ -739,11 +739,11 @@ Fix:   Rename to 'createdBook' and update all references in spec files. | AUTO-A
    | `src/fixtures/index.ts` — lifecycle fixture naming | `lifecycle-architect` | Naming convention (R8) |
    | `tests/**/*.spec.ts` — controller/client instantiation | `lifecycle-architect` | No lifecycle instantiation in specs (R7) |
 
-   > Note: `src/fixtures/index.ts` is already owned by `test-standards` for fixture
+   > Note: `src/fixtures/index.ts` is already owned by `spec-code-standard` for fixture
    > completeness and import hygiene. `lifecycle-architect` owns only the teardown
    > contract concern (R4). There is no scan overlap.
 
-3. **Mode 1 — Full Pipeline**: add step after `spec-standards`:
+3. **Mode 1 — Full Pipeline**: add step after `spec-organisation-standard`:
    ```markdown
    6. Run `lifecycle-architect` on `src/api/` and `src/fixtures/index.ts` (teardown only):
       - Detect all API layer violations
@@ -756,8 +756,8 @@ Fix:   Rename to 'createdBook' and update all references in spec files. | AUTO-A
    [automation-architect] PIPELINE COMPLETE
    ─────────────────────────────────────────
    pom-architect:        X violations found — Y auto-applied
-   test-standards:       X violations found — Y auto-applied
-   spec-standards:       X violations found — Y auto-applied
+   spec-code-standard:       X violations found — Y auto-applied
+   spec-organisation-standard:       X violations found — Y auto-applied
    lifecycle-architect:  X violations found — Y auto-applied
    Remaining manual fixes: <list if any, or "none">
    [automation-architect] ✅ All rules satisfied.
@@ -801,3 +801,4 @@ Fix:   Rename to 'createdBook' and update all references in spec files. | AUTO-A
      controllers/  ← Business operations             (lifecycle-architect)
      mocks/        ← Route stub factories            (lifecycle-architect)
    ```
+

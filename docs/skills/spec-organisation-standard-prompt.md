@@ -1,27 +1,27 @@
-# Meta-prompt: Create new skill spec-standards
+# Meta-prompt: Create new skill spec-organisation-standard
 
 Use this prompt directly with Kiro to create a new skill
-`.kiro/skills/spec-standards/SKILL.md` for any Playwright + TypeScript project.
+`.kiro/skills/spec-organisation-standard/SKILL.md` for any Playwright + TypeScript project.
 
-This is a NEW skill — do NOT modify `test-standards`. After creating the skill:
-- Register `spec-standards` as a third sub-skill in `automation-architect/SKILL.md`
-- Update Mode 1 (Full Pipeline) to run `spec-standards` alongside `pom-architect`
-  and `test-standards`
+This is a NEW skill — do NOT modify `spec-code-standard`. After creating the skill:
+- Register `spec-organisation-standard` as a third sub-skill in `automation-architect/SKILL.md`
+- Update Mode 1 (Full Pipeline) to run `spec-organisation-standard` alongside `pom-architect`
+  and `spec-code-standard`
 - Update the Sub-Skill Invocation Reference table in `automation-architect/SKILL.md`
 
 ---
 
 ## Skill overview
 
-`spec-standards` owns the **organisational and lifecycle standards** for spec files.
-It is distinct from `test-standards`, which owns code-level quality rules (imports,
+`spec-organisation-standard` owns the **organisational and lifecycle standards** for spec files.
+It is distinct from `spec-code-standard`, which owns code-level quality rules (imports,
 fixtures, data hygiene).
 
 | Skill | Domain |
 |-------|--------|
 | `pom-architect` | Page Object layer structure |
-| `test-standards` | Spec code quality — imports, fixtures, credentials, framework |
-| `spec-standards` | Spec organisation — folder hierarchy, file naming, TC IDs, step definition, *(future: tagging, test lifecycle)* |
+| `spec-code-standard` | Spec code quality — imports, fixtures, credentials, framework |
+| `spec-organisation-standard` | Spec organisation — folder hierarchy, file naming, TC IDs, step definition, *(future: tagging, test lifecycle)* |
 
 **Growth path for future modules:**
 - Test tagging conventions (`@smoke`, `@regression`, TC-level tags via Playwright's `tag` option)
@@ -32,7 +32,7 @@ fixtures, data hygiene).
 
 ## Prompt
 
-Create `.kiro/skills/spec-standards/SKILL.md` with the following content.
+Create `.kiro/skills/spec-organisation-standard/SKILL.md` with the following content.
 
 ---
 
@@ -40,7 +40,7 @@ Create `.kiro/skills/spec-standards/SKILL.md` with the following content.
 
 ```yaml
 ---
-name: spec-standards
+name: spec-organisation-standard
 description: >
   Enforce and auto-apply organisational and lifecycle standards for spec files in
   Playwright + TypeScript projects. Covers folder hierarchy, file naming, TC ID format,
@@ -299,7 +299,7 @@ test('TC8: Verify All Products and product detail page', async ({ homePage }) =>
 ### Violation Output Format
 
 ```
-[spec-standards] SEVERITY — RULE_NAME
+[spec-organisation-standard] SEVERITY — RULE_NAME
 File:  <relative path from project root>
 Line:  <line number>
 Issue: <one sentence describing the problem>
@@ -308,31 +308,31 @@ Fix:   <one sentence describing the fix> | AUTO-APPLIED
 
 **Examples:**
 ```
-[spec-standards] ERROR — FOLDER_STRUCTURE
+[spec-organisation-standard] ERROR — FOLDER_STRUCTURE
 File:  tests/products.spec.ts
 Line:  1
 Issue: Spec file is not inside the required tests/ui/{suite}/{feature}/ hierarchy.
 Fix:   Split into one file per TC and move to tests/ui/smoke/products/. | AUTO-APPLIED
 
-[spec-standards] ERROR — FILE_NAMING_CONVENTION
+[spec-organisation-standard] ERROR — FILE_NAMING_CONVENTION
 File:  tests/ui/smoke/login/example.spec.ts
 Line:  —
 Issue: Filename does not match TC{N}-{short-kebab-description}.spec.ts pattern.
 Fix:   Rename to TC0-valid-login.spec.ts. | AUTO-APPLIED
 
-[spec-standards] ERROR — DESCRIBE_MATCHES_FEATURE_FOLDER
+[spec-organisation-standard] ERROR — DESCRIBE_MATCHES_FEATURE_FOLDER
 File:  tests/ui/smoke/products/TC8-verify-all-products-and-detail.spec.ts
 Line:  3
 Issue: test.describe() name 'All Products' does not match folder 'products' (expected 'Products').
 Fix:   Rename describe block to 'Products'. | AUTO-APPLIED
 
-[spec-standards] ERROR — TC_ID_NAMING_CONVENTION
+[spec-organisation-standard] ERROR — TC_ID_NAMING_CONVENTION
 File:  tests/ui/smoke/products/TC8-verify-all-products-and-detail.spec.ts
 Line:  4
 Issue: test() name does not start with 'TC8: '.
 Fix:   Prepend 'TC8: ' to the test name. | AUTO-APPLIED
 
-[spec-standards] ERROR — USE_TEST_STEP
+[spec-organisation-standard] ERROR — USE_TEST_STEP
 File:  tests/ui/smoke/products/TC9-search-product.spec.ts
 Line:  6
 Issue: test() body uses inline '// Step N:' comments instead of test.step() blocks.
@@ -352,11 +352,12 @@ Fix:   Wrap each logical group into await test.step('description', async () => {
 
 ### Updates required in automation-architect/SKILL.md
 
-1. **Sub-skills list** in Project Context: add `spec-standards (TC organisation rules)`
-2. **Mode 1 — Full Pipeline**: add step to run `spec-standards` after `test-standards`
-3. **Mode 1 output format**: add `spec-standards` line to the PIPELINE COMPLETE summary
+1. **Sub-skills list** in Project Context: add `spec-organisation-standard (TC organisation rules)`
+2. **Mode 1 — Full Pipeline**: add step to run `spec-organisation-standard` after `spec-code-standard`
+3. **Mode 1 output format**: add `spec-organisation-standard` line to the PIPELINE COMPLETE summary
 4. **Sub-Skill Invocation Reference table**: add new row:
 
 | Goal | Skill to load | Trigger phrase example |
 |------|---------------|------------------------|
-| Fix TC folder / naming / step violations | `spec-standards` | `"check spec structure"` |
+| Fix TC folder / naming / step violations | `spec-organisation-standard` | `"check spec structure"` |
+

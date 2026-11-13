@@ -51,12 +51,12 @@ with the expanded version below, and append the two new sections
 
 | Alias | Resolves to | Used by |
 |-------|-------------|---------|
-| `@pages/*` | `src/ui/pages/*` | pom-architect, test-standards |
+| `@pages/*` | `src/ui/pages/*` | pom-architect, spec-code-standard |
 | `@components/*` | `src/ui/components/*` | pom-architect |
-| `@fixtures` | `src/fixtures/index` | test-standards |
-| `@fixtures/*` | `src/fixtures/*` | test-standards |
-| `@data/*` | `src/data/*` | test-standards, pom-architect |
-| `@config/*` | `src/config/*` | test-standards |
+| `@fixtures` | `src/fixtures/index` | spec-code-standard |
+| `@fixtures/*` | `src/fixtures/*` | spec-code-standard |
+| `@data/*` | `src/data/*` | spec-code-standard, pom-architect |
+| `@config/*` | `src/config/*` | spec-code-standard |
 | `@helpers/*` | `src/helpers/*` | (reserved for future helpers) |
 | `@api/*` | `src/api/*` | (reserved for API layer) |
 
@@ -67,15 +67,15 @@ src/
   ui/
     pages/          ← Page Objects       (pom-architect)
     components/     ← UI Components      (pom-architect)
-  fixtures/         ← Playwright fixtures (test-standards)
-  data/             ← Test data files     (test-standards, pom-architect)
-  config/           ← Env config (ENV.ts) (test-standards, pom-architect)
+  fixtures/         ← Playwright fixtures (spec-code-standard)
+  data/             ← Test data files     (spec-code-standard, pom-architect)
+  config/           ← Env config (ENV.ts) (spec-code-standard, pom-architect)
   helpers/          ← Shared utilities    (future)
   api/              ← API client layer    (future)
 tests/
   ui/
-    smoke/          ← Critical path TCs  (spec-standards)
-    regression/     ← Edge case TCs      (spec-standards)
+    smoke/          ← Critical path TCs  (spec-organisation-standard)
+    regression/     ← Edge case TCs      (spec-organisation-standard)
 docs/
   decisions/        ← ADRs for hub growth decisions
 .kiro/
@@ -138,8 +138,8 @@ a skill is added, updated, or retired.
 | Skill | Domain | File Scope | Rules / Checks | Added | Status |
 |-------|--------|-----------|----------------|-------|--------|
 | `pom-architect` | Page Object structure | `src/ui/pages/**/*.ts` · `src/ui/components/**/*.ts` | R1–R8 | M4 | Active |
-| `test-standards` | Spec code quality | `tests/**/*.spec.ts` · `src/fixtures/index.ts` | R1–R8 | M4 | Active |
-| `spec-standards` | Spec organisation & lifecycle | `tests/**/*.spec.ts` | R1–R5 | M5 | Active |
+| `spec-code-standard` | Spec code quality | `tests/**/*.spec.ts` · `src/fixtures/index.ts` | R1–R8 | M4 | Active |
+| `spec-organisation-standard` | Spec organisation & lifecycle | `tests/**/*.spec.ts` | R1–R5 | M5 | Active |
 | `git-standards` | Git workflow | git state (no files) | C1–C3, E1–E5 | M5 | Active |
 
 ### Scan scope ownership
@@ -151,10 +151,10 @@ check the same property on the same file.
 |--------------|-------------|---------|
 | `src/ui/pages/**/*.ts` | `pom-architect` | POM structure, locators, actions |
 | `src/ui/components/**/*.ts` | `pom-architect` | Component structure |
-| `src/fixtures/index.ts` | `test-standards` | Fixture completeness, import hygiene |
-| `tests/**/*.spec.ts` — imports, fixtures, credentials | `test-standards` | Code quality |
-| `tests/**/*.spec.ts` — folder, naming, TC IDs, steps | `spec-standards` | Organisation |
-| `src/**/*.ts` (non-PO, non-fixture) | `test-standards` | Import hygiene only |
+| `src/fixtures/index.ts` | `spec-code-standard` | Fixture completeness, import hygiene |
+| `tests/**/*.spec.ts` — imports, fixtures, credentials | `spec-code-standard` | Code quality |
+| `tests/**/*.spec.ts` — folder, naming, TC IDs, steps | `spec-organisation-standard` | Organisation |
+| `src/**/*.ts` (non-PO, non-fixture) | `spec-code-standard` | Import hygiene only |
 | git branch + commit history | `git-standards` | Workflow conventions |
 ```
 
@@ -223,12 +223,12 @@ When a rule depends on a version-specific feature, document it inline.
 
 | API / Feature | Min Playwright version | Used by |
 |---------------|----------------------|---------|
-| `test.step()` | 1.22 | `spec-standards` R5 |
-| `test()` native tag option `{ tag: [] }` | 1.42 | `spec-standards` (future tagging rules) |
+| `test.step()` | 1.22 | `spec-organisation-standard` R5 |
+| `test()` native tag option `{ tag: [] }` | 1.42 | `spec-organisation-standard` (future tagging rules) |
 | `--grep @tag` (current approach) | any | `package.json test:smoke` |
 
 **Migration note:** The current `test:smoke` script uses `--grep @smoke` (regex-based).
-When `spec-standards` adds native tag rules, update the script to use
+When `spec-organisation-standard` adds native tag rules, update the script to use
 `playwright test --project=smoke` or Playwright's `--tag` flag and retire the grep approach.
 
 ---
@@ -240,9 +240,9 @@ When `tsconfig.json` changes, assess the impact on each skill:
 | tsconfig change | Skills affected | Action required |
 |-----------------|-----------------|-----------------|
 | `target` downgraded (e.g. ES2021) | `pom-architect` | R2 (getters) may become optional — review |
-| `strict` disabled | `test-standards`, `pom-architect` | Rules enforcing type safety become less critical |
-| New path alias added | `test-standards`, `pom-architect` | Add alias to the Path Alias Map in both skills |
-| Path alias removed | `test-standards`, `pom-architect` | Remove alias; update auto-fix guidance |
+| `strict` disabled | `spec-code-standard`, `pom-architect` | Rules enforcing type safety become less critical |
+| New path alias added | `spec-code-standard`, `pom-architect` | Add alias to the Path Alias Map in both skills |
+| Path alias removed | `spec-code-standard`, `pom-architect` | Remove alias; update auto-fix guidance |
 | `moduleResolution` changed | All skills | Re-verify import resolution examples |
 
 ---
@@ -255,10 +255,10 @@ skills are affected. Use this impact table to identify what to update:
 | Changed component | Skills to update | What to check |
 |-------------------|-----------------|---------------|
 | `BasePage` API | `pom-architect` | R1 (extends), R5 (navigate) |
-| `src/fixtures/index.ts` pattern | `test-standards` | R3 (no manual beforeEach), R4 (fixture registration) |
-| `src/data/auth.data.ts` structure | `test-standards`, `pom-architect` | R7/R8 (credential references) |
-| `src/config/env.ts` (new ENV var) | `test-standards`, `pom-architect` | Update data hygiene examples |
-| `playwright.config.ts` (testDir) | `spec-standards` | R1 folder structure root |
+| `src/fixtures/index.ts` pattern | `spec-code-standard` | R3 (no manual beforeEach), R4 (fixture registration) |
+| `src/data/auth.data.ts` structure | `spec-code-standard`, `pom-architect` | R7/R8 (credential references) |
+| `src/config/env.ts` (new ENV var) | `spec-code-standard`, `pom-architect` | Update data hygiene examples |
+| `playwright.config.ts` (testDir) | `spec-organisation-standard` | R1 folder structure root |
 
 ---
 
@@ -282,24 +282,24 @@ Some skills produce output that other skills depend on. When running the Full Pi
 
 ```
 1. pom-architect      ← establishes correct PO layer (pages, components)
-2. test-standards     ← validates spec code quality (imports, fixtures)
-3. spec-standards     ← validates spec organisation (requires test-standards clean)
+2. spec-code-standard     ← validates spec code quality (imports, fixtures)
+3. spec-organisation-standard     ← validates spec organisation (requires spec-code-standard clean)
 4. git-standards      ← validates git state (run last, before push/PR)
 ```
 
-If `pom-architect` produces violations that are not fixed, `spec-standards` and
-`test-standards` may report false positives (e.g., a missing PO method triggers
-a test-standards violation).
+If `pom-architect` produces violations that are not fixed, `spec-organisation-standard` and
+`spec-code-standard` may report false positives (e.g., a missing PO method triggers
+a spec-code-standard violation).
 ```
 
 ---
 
 ### Updates to Mode 1 — Full Pipeline
 
-In the existing Mode 1 steps, update step 4 to include `spec-standards`:
+In the existing Mode 1 steps, update step 4 to include `spec-organisation-standard`:
 
 ```markdown
-4. Run `spec-standards` on spec files:
+4. Run `spec-organisation-standard` on spec files:
    - Detect all TC organisation violations
    - Auto-fix every fixable violation (R1–R5)
    - Collect remaining manual items
@@ -311,8 +311,8 @@ And update the output format to include the new skill:
 [automation-architect] PIPELINE COMPLETE
 ─────────────────────────────────────────
 pom-architect:    X violations found — Y auto-applied
-test-standards:   X violations found — Y auto-applied
-spec-standards:   X violations found — Y auto-applied
+spec-code-standard:   X violations found — Y auto-applied
+spec-organisation-standard:   X violations found — Y auto-applied
 Remaining manual fixes: <list if any, or "none">
 [automation-architect] ✅ All rules satisfied.
 ```
@@ -409,3 +409,4 @@ Sections NOT tracked by this mode (manual updates only):
 **Note:** This mode only updates the tracked sections listed above. Sections marked
 as manual-only (Learning Path, Quick Start, etc.) are reported as out-of-scope if
 the user asks about them.
+

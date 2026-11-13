@@ -142,8 +142,8 @@ web-automation/
 │       ├── automation-architect/ # Hub — orchestrates all sub-skills
 │       ├── lifecycle-architect/  # API layer structure and teardown rules
 │       ├── pom-architect/        # Page Object Model rules
-│       ├── test-standards/       # Spec code quality + site placement rules
-│       ├── spec-standards/       # Spec organisation and TC naming rules
+│       ├── spec-code-standard/       # Spec code quality + site placement rules
+│       ├── spec-organisation-standard/       # Spec organisation and TC naming rules
 │       └── git-standards/        # Git workflow conventions and execution
 │
 ├── .env.example                  # Environment variable template
@@ -227,8 +227,8 @@ and apply the framework's conventions automatically.
 | Skill | Purpose | Load when... |
 |-------|---------|--------------|
 | `pom-architect` | Enforces Page Object Model rules | Creating or reviewing Page Objects |
-| `test-standards` | Enforces spec code quality and site-layer placement | Writing or reviewing spec files |
-| `spec-standards` | Enforces TC folder structure and naming | Creating or reorganising test cases |
+| `spec-code-standard` | Enforces spec code quality and site-layer placement | Writing or reviewing spec files |
+| `spec-organisation-standard` | Enforces TC folder structure and naming | Creating or reorganising test cases |
 | `git-standards` | Validates and executes git workflow | Before committing, pushing, or opening a PR |
 | `lifecycle-architect` | Enforces API layer structure, teardown contract, and token refresh rules | Implementing API-based setup/teardown or scaffolding a new API resource |
 | `automation-architect` | Orchestrates all skills (hub) | Full architecture review or scaffolding a new page |
@@ -296,3 +296,4 @@ If architectural files changed in your branch, `git-standards` will warn you to 
 7. Run `npm run typecheck` before committing.
 8. Load the appropriate Kiro skill before creating or refactoring files to verify
    conventions are met.
+
