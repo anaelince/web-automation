@@ -1,5 +1,5 @@
 import { BasePage } from '@pages/BasePage';
-import { ProductDetailPage } from '@pages/ProductDetailPage';
+import { ProductDetailPage } from '@pages/sites/automationexercise/ProductDetailPage';
 
 export class ProductsPage extends BasePage {
   // ── Locators ─────────────────────────────────────────────────────────────

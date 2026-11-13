@@ -29,5 +29,7 @@ export const ENV = {
   testUser: {
     name: process.env.TEST_USER_NAME ?? '',
     password: process.env.TEST_USER_PASSWORD ?? '',
+    /** demoqa userId (UUID) — required for Book Store API teardown (DELETE /BookStore/v1/Books) */
+    id: process.env.TEST_USER_ID ?? '',
   },
 } as const;
