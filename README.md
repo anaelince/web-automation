@@ -138,13 +138,23 @@ web-automation/
 │       └── api/                  # API layer reference
 │
 ├── .kiro/
-│   └── skills/                   # Kiro AI skill definitions
-│       ├── automation-architect/ # Hub — orchestrates all sub-skills
-│       ├── api-setup-teardown-standard/  # API layer structure and teardown rules
-│       ├── ui-pom-standard/        # Page Object Model rules
-│       ├── spec-code-standard/       # Spec code quality + site placement rules
-│       ├── spec-organisation-standard/       # Spec organisation and TC naming rules
-│       └── git-workflow-docs-standard/        # Git workflow conventions and execution
+│   ├── skills/                   # Kiro AI skill definitions
+│   │   ├── automation-architect/         # Hub — orchestrates all 6 sub-skills
+│   │   ├── ui-pom-standard/              # Page Object Model rules
+│   │   ├── api-setup-teardown-standard/  # API layer structure and teardown rules
+│   │   ├── spec-organisation-standard/   # Spec organisation and TC naming rules
+│   │   ├── spec-code-standard/           # Spec code quality + site placement rules
+│   │   ├── spec-quality-lifecycle-standard/ # TC quality, assertions, flakiness prevention
+│   │   └── git-workflow-docs-standard/   # Git workflow conventions + docs sync
+│   ├── steering/                 # Context injected into Kiro sessions
+│   │   ├── project-context.md            # Always-active project conventions
+│   │   ├── framework-reference.md        # Manual orchestrator — loads all 4 below at once
+│   │   ├── framework-path-aliases.md     # Manual — full alias map
+│   │   ├── framework-playwright-config.md # Manual — config settings + npm scripts
+│   │   ├── framework-tech-stack.md       # Manual — dependency versions
+│   │   └── framework-basepage-contract.md # Manual — BasePage contract
+│   └── hooks/                    # Event-driven automation
+│       └── docs-sync-on-push.json        # Checks doc sync after git push
 │
 ├── .env.example                  # Environment variable template
 ├── playwright.config.ts          # Playwright configuration
@@ -227,22 +237,24 @@ and apply the framework's conventions automatically.
 | Skill | Purpose | Load when... |
 |-------|---------|--------------|
 | `ui-pom-standard` | Enforces Page Object Model rules | Creating or reviewing Page Objects |
-| `spec-code-standard` | Enforces spec code quality and site-layer placement | Writing or reviewing spec files |
-| `spec-organisation-standard` | Enforces TC folder structure and naming | Creating or reorganising test cases |
-| `git-workflow-docs-standard` | Validates and executes git workflow | Before committing, pushing, or opening a PR |
 | `api-setup-teardown-standard` | Enforces API layer structure, teardown contract, and token refresh rules | Implementing API-based setup/teardown or scaffolding a new API resource |
-| `automation-architect` | Orchestrates all skills (hub) | Full architecture review or scaffolding a new page |
+| `spec-organisation-standard` | Enforces TC folder structure and naming | Creating or reorganising test cases |
+| `spec-code-standard` | Enforces spec code quality and site-layer placement | Writing or reviewing spec files |
+| `spec-quality-lifecycle-standard` | Enforces TC lifecycle quality: preconditions, assertions, selectors, wait strategies, anti-flakiness | Writing, reviewing, or debugging test cases |
+| `git-workflow-docs-standard` | Validates and executes git workflow + docs sync | Before committing, pushing, or opening a PR |
+| `automation-architect` | Hub — orchestrates all 6 sub-skills | Full architecture review or scaffolding a new feature |
 
 **Example usage in Kiro chat:**
 
 ```
-"apply architecture"       → runs all code-quality skills on the project
+"apply architecture"       → runs all skills on the project (full pipeline)
 "scaffold LoginPage"       → generates Page Object + fixture + spec skeleton
 "scaffold api for books"   → scaffolds API client, controller, model, endpoints + fixture
+"review tc quality"        → scans all specs for flaky patterns and assertion issues
+"write tc"                 → scaffolds a new quality TC from scratch
 "check git"                → validates branch name and commit messages
 "git workflow"             → commit + push + open PR following conventions
-"check spec structure"     → validates TC folder hierarchy and naming
-"update readme"            → syncs README sections with current project state (Mode 5)
+"update docs"              → syncs README + wiki with current project state (Mode 5)
 ```
 
 > **Note for maintainers:** This section is auto-updated by `automation-architect`
