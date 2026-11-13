@@ -133,13 +133,16 @@ that are short (<50 lines) and always relevant.
 | File | Inclusion | Purpose |
 |---|---|---|
 | `project-context.md` | `always` | Project conventions (English, no Azure DevOps, secrets out of git) |
+| `framework-reference.md` | `manual` | **Orchestrator** — loads all four framework steering files at once via `#[[file:...]]` |
 | `framework-path-aliases.md` | `manual` | Full alias map with site-based path patterns |
 | `framework-playwright-config.md` | `manual` | playwright.config.ts settings + npm scripts |
 | `framework-tech-stack.md` | `manual` | Dependency versions and TypeScript compiler settings |
 | `framework-basepage-contract.md` | `manual` | BasePage class contract and locator rules |
 | `pptx-workflow.md` | *(check file)* | — |
 
-**Activation:** `#framework-path-aliases` in chat injects it for that conversation only.
+**Activation:**
+- `#framework-reference` → loads all four framework files at once (recommended for full context)
+- `#framework-path-aliases` → loads only the alias map (targeted use)
 
 ---
 
