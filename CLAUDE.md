@@ -51,17 +51,20 @@ Always use aliases — never relative imports (`./` or `../`):
 
 ## Skills — Active Rules
 
-This project enforces the following AI Automation SDLC skills:
+This project enforces 7 AI Automation SDLC skills.  
+For the **full rule set** load: `@docs/agents/claude/skill-reference.md`
 
-| Skill | Governs | Load full rules |
-|---|---|---|
-| `ui-pom-standard` | Page Object Model structure | `@docs/agents/claude/skill-reference.md#ui-pom-standard` |
-| `api-setup-teardown-standard` | API layer, setup/teardown, token lifecycle | `#api-setup-teardown-standard` |
-| `spec-organisation-standard` | Spec file location and naming | `#spec-organisation-standard` |
-| `spec-code-standard` | Imports, fixtures, credentials | `#spec-code-standard` |
-| `spec-quality-lifecycle-standard` | TC lifecycle, assertions, anti-flakiness | `#spec-quality-lifecycle-standard` |
-| `git-workflow-docs-standard` | Commit format, docs sync | `#git-workflow-docs-standard` |
-| `automation-architect` | Hub: full pipeline | `#automation-architect` |
+**Quick trigger:** Say `"apply architecture"` after loading `@docs/agents/claude/skill-reference.md`
+
+| Skill | Governs |
+|---|---|
+| `ui-pom-standard` | Page Object Model structure |
+| `api-setup-teardown-standard` | API layer, setup/teardown, token lifecycle |
+| `spec-organisation-standard` | Spec file location and naming |
+| `spec-code-standard` | Imports, fixtures, credentials |
+| `spec-quality-lifecycle-standard` | TC lifecycle, assertions, anti-flakiness |
+| `git-workflow-docs-standard` | Commit format, docs sync |
+| `automation-architect` | Hub: full pipeline |
 
 ---
 

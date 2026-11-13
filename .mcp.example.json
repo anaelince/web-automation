@@ -1,0 +1,14 @@
+{
+  "_comment": "Copy this file to .kiro/settings/mcp.json and fill in your machine-specific paths and tokens.",
+  "_note": "mcp.example.json is safe to commit. mcp.json is NOT — it may contain secrets.",
+  "mcpServers": {
+    "aws-docs": {
+      "command": "uvx",
+      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": true
+    }
+  }
+}
