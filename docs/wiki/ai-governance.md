@@ -216,3 +216,23 @@ new hook pattern, steering decision):
 > This document itself is the prompt for maintaining AI governance. When creating
 > a new spec, hook, steering file, or skill, refer to this document first to ensure
 > consistency with established conventions.
+
+---
+
+## 8 — Project-Specific Git Convention Override
+
+**Decision:** This project pushes **directly to `main`** — no feature branches, no PRs.
+
+| Convention | Default (git-workflow-docs-standard) | This project |
+|---|---|---|
+| Branch naming | `(test\|fix)/<scope>` | Not used |
+| Merge strategy | PR → main | Direct push |
+| Branch required | Yes | No |
+| Commit format | Conventional Commits | ✅ Required (unchanged) |
+| Docs sync check | ✅ Required (unchanged) | ✅ Required (unchanged) |
+
+**What still applies:** Conventional Commits format (C1) and docs sync detection (C4)
+remain enforced. Only the branch-and-PR workflow (C2, C3) is bypassed.
+
+**Rationale:** Course project — single developer, rapid iteration. The commit history
+IS the audit trail.
