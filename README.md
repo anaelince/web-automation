@@ -96,32 +96,53 @@ web-automation/
 │
 ├── src/                          # Framework source code
 │   ├── ui/
-│   │   ├── pages/                # Page Objects (extend BasePage)
+│   │   ├── pages/
+│   │   │   ├── BasePage.ts       # Shared base class (all POs extend this)
+│   │   │   └── sites/            # Page Objects organised by target site
+│   │   │       ├── saucedemo/    # SauceDemo POs (LoginPage, InventoryPage)
+│   │   │       ├── demoqa/       # demoqa POs (BookStorePage, ProfilePage, …)
+│   │   │       └── automationexercise/  # AutomationExercise POs
 │   │   └── components/           # Reusable UI component objects (reserved)
+│   ├── api/
+│   │   └── sites/                # API layer organised by target site
+│   │       └── demoqa/
+│   │           ├── client/       # ApiClient — sole HTTP entry point
+│   │           ├── controllers/  # AccountController, BookController
+│   │           ├── endpoints/    # URL constants (no HTTP logic)
+│   │           └── models/       # TypeScript interfaces for payloads
 │   ├── fixtures/
-│   │   └── index.ts              # Playwright fixture definitions
+│   │   └── index.ts              # Playwright fixture definitions (all sites)
 │   ├── data/
-│   │   └── auth.data.ts          # Test user accounts
+│   │   └── sites/                # Test data organised by target site
+│   │       ├── saucedemo/        # auth.data.ts (users)
+│   │       └── demoqa/           # auth.data.ts (bookStoreUsers)
 │   ├── config/
 │   │   └── env.ts                # Environment variable validation
-│   ├── helpers/                  # (reserved for shared utilities)
-│   └── api/                      # (reserved for API client layer)
+│   └── helpers/                  # (reserved for shared utilities)
 │
 ├── tests/                        # Spec files
 │   └── ui/
-│       ├── smoke/                # Critical path test cases
-│       │   └── {feature}/        # One folder per app feature
-│       │       └── TC{N}-{name}.spec.ts   # One file per test case
-│       └── regression/           # Edge cases and negative paths
+│       └── smoke/
+│           └── sites/            # Test cases organised by target site
+│               ├── saucedemo/    # SauceDemo TCs
+│               ├── demoqa/       # demoqa TCs (TC02-add-book-to-collection)
+│               └── automationexercise/  # AutomationExercise TCs
 │
-├── docs/                         # Course material and architecture prompts
-│   └── decisions/                # Architecture Decision Records (ADRs)
+├── docs/
+│   ├── README.md                 # Documentation index
+│   ├── course/                   # Course presentation slides (M1–M6)
+│   ├── skills/                   # Meta-prompts for creating/updating Kiro skills
+│   ├── test-cases/               # Test case specifications per site
+│   │   └── demoqa/
+│   └── wiki/                     # Living framework documentation
+│       └── api/                  # API layer reference
 │
 ├── .kiro/
 │   └── skills/                   # Kiro AI skill definitions
 │       ├── automation-architect/ # Hub — orchestrates all sub-skills
+│       ├── lifecycle-architect/  # API layer structure and teardown rules
 │       ├── pom-architect/        # Page Object Model rules
-│       ├── test-standards/       # Spec code quality rules
+│       ├── test-standards/       # Spec code quality + site placement rules
 │       ├── spec-standards/       # Spec organisation and TC naming rules
 │       └── git-standards/        # Git workflow conventions and execution
 │
@@ -161,11 +182,12 @@ test('TC9: Search Product', async ({ homePage }) => {
 
 ### Test Case Organisation
 
-Each test case lives in its own file under `tests/ui/{suite}/{feature}/`:
+Each test case lives in its own file under `tests/ui/{suite}/sites/{site}/{feature}/`:
 
 ```
-tests/ui/smoke/products/TC8-verify-all-products-and-detail.spec.ts
-tests/ui/smoke/products/TC9-search-product.spec.ts
+tests/ui/smoke/sites/demoqa/books/TC02-add-book-to-collection.spec.ts
+tests/ui/smoke/sites/automationexercise/products/TC8-verify-all-products-and-detail.spec.ts
+tests/ui/smoke/sites/saucedemo/login/TC0-valid-login.spec.ts
 ```
 
 Steps inside each test use `test.step()` — which appears as named entries in the
@@ -205,9 +227,10 @@ and apply the framework's conventions automatically.
 | Skill | Purpose | Load when... |
 |-------|---------|--------------|
 | `pom-architect` | Enforces Page Object Model rules | Creating or reviewing Page Objects |
-| `test-standards` | Enforces spec code quality | Writing or reviewing spec files |
+| `test-standards` | Enforces spec code quality and site-layer placement | Writing or reviewing spec files |
 | `spec-standards` | Enforces TC folder structure and naming | Creating or reorganising test cases |
 | `git-standards` | Validates and executes git workflow | Before committing, pushing, or opening a PR |
+| `lifecycle-architect` | Enforces API layer structure, teardown contract, and token refresh rules | Implementing API-based setup/teardown or scaffolding a new API resource |
 | `automation-architect` | Orchestrates all skills (hub) | Full architecture review or scaffolding a new page |
 
 **Example usage in Kiro chat:**
@@ -215,6 +238,7 @@ and apply the framework's conventions automatically.
 ```
 "apply architecture"       → runs all code-quality skills on the project
 "scaffold LoginPage"       → generates Page Object + fixture + spec skeleton
+"scaffold api for books"   → scaffolds API client, controller, model, endpoints + fixture
 "check git"                → validates branch name and commit messages
 "git workflow"             → commit + push + open PR following conventions
 "check spec structure"     → validates TC folder hierarchy and naming
@@ -264,7 +288,7 @@ If architectural files changed in your branch, `git-standards` will warn you to 
 ## Contribution Guidelines
 
 1. Write all documentation and code examples in English.
-2. Follow the TC folder structure: `tests/ui/{suite}/{feature}/TC{N}-{name}.spec.ts`
+2. Follow the TC folder structure: `tests/ui/{suite}/sites/{site}/{feature}/TC{N}-{name}.spec.ts`
 3. One test case per file. Data-driven variants stay in the same file.
 4. Use `test.step()` for step labelling — no inline `// Step N:` comments.
 5. Respect the git workflow conventions (branch naming, commit format).
