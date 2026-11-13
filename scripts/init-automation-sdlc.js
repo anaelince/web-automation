@@ -117,12 +117,15 @@ if (!fs.existsSync(hooksSrc)) {
 
 // ── 4. docs/ governance ──────────────────────────────────────────────────────
 
-console.log('\n  [4/4] Docs (skills prompts + governance)...');
+console.log('\n  [4/5] Docs (skills prompts + governance)...');
 
 const docTargets = [
   // AI governance wiki
   { src: path.join(REPO_ROOT, 'docs', 'wiki', 'ai-governance.md'),
     dest: path.join(TARGET_DIR, 'docs', 'wiki', 'ai-governance.md') },
+  // Init script reference
+  { src: path.join(REPO_ROOT, 'docs', 'wiki', 'init-script.md'),
+    dest: path.join(TARGET_DIR, 'docs', 'wiki', 'init-script.md') },
   // ADR-001 naming convention
   { src: path.join(REPO_ROOT, 'docs', 'decisions', 'ADR-001-skill-naming-convention.md'),
     dest: path.join(TARGET_DIR, 'docs', 'decisions', 'ADR-001-skill-naming-convention.md') },
@@ -148,6 +151,23 @@ for (const { src, dest } of docTargets) {
   }
 }
 
+// ── 5. MCP example config ─────────────────────────────────────────────────────
+
+console.log('\n  [5/5] MCP example config...');
+const mcpExampleSrc  = path.join(__dirname, 'templates', 'mcp.example.json');
+const mcpExampleDest = path.join(TARGET_DIR, '.kiro', 'settings', 'mcp.example.json');
+
+if (fs.existsSync(mcpExampleSrc)) {
+  if (fs.existsSync(mcpExampleDest)) {
+    log('–', '.kiro/settings/mcp.example.json (already exists — skipped)');
+    results.skipped.push('.kiro/settings/mcp.example.json');
+  } else {
+    copyFile(mcpExampleSrc, mcpExampleDest);
+    log('✓', '.kiro/settings/mcp.example.json');
+    results.created.push('.kiro/settings/mcp.example.json');
+  }
+}
+
 // ── Summary ───────────────────────────────────────────────────────────────────
 
 console.log('\n╔══════════════════════════════════════════════════════╗');
@@ -161,4 +181,6 @@ console.log('  1. Open the target project in Kiro IDE');
 console.log('  2. The skills, steering, and hooks are ready to use');
 console.log('  3. Run "apply architecture" in Kiro chat to verify the setup');
 console.log('  4. Read docs/wiki/ai-governance.md for governance conventions');
-console.log('  5. Adapt framework-*.md steering files to your project stack\n');
+console.log('  5. Adapt framework-*.md steering files to your project stack');
+console.log('  6. Copy .kiro/settings/mcp.example.json → mcp.json and configure MCP servers');
+console.log('  7. See docs/wiki/init-script.md for full configuration checklist\n');
