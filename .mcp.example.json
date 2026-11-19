@@ -1,5 +1,5 @@
 {
-  "_comment": "Copy this file to .kiro/settings/mcp.json and fill in your machine-specific paths and tokens.",
+  "_comment": "Claude Code: copy to .mcp.json at the repo root. Kiro: copy to .kiro/settings/mcp.json. Fill in machine-specific paths and tokens.",
   "_note": "mcp.example.json is safe to commit. mcp.json is NOT — it may contain secrets.",
   "mcpServers": {
     "aws-docs": {
