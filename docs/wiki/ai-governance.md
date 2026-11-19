@@ -236,3 +236,23 @@ remain enforced. Only the branch-and-PR workflow (C2, C3) is bypassed.
 
 **Rationale:** Course project — single developer, rapid iteration. The commit history
 IS the audit trail.
+
+---
+
+## Claude Code equivalents (migrated 2026-11-18)
+
+| Kiro | Claude Code | Notes |
+|---|---|---|
+| `.kiro/steering/project-context.md` (`always`) | `CLAUDE.md` → *Project conventions* | Loaded every session |
+| `.kiro/steering/framework-*.md`, `pptx-workflow.md` (`manual`) | `.claude/rules/*.md` with `paths:` frontmatter | Load automatically when matching files are touched |
+| `framework-reference.md` (orchestrator) | `.claude/skills/framework-reference/` | Skill that reads all four framework rules |
+| `.kiro/skills/*/SKILL.md` | `.claude/skills/*/SKILL.md` | Identical content |
+| `.kiro/settings/mcp.json` | `.mcp.json` (project) or `~/.claude.json` (user) | See below |
+
+**Azure DevOps MCP:** configured at **user scope** (`~/.claude.json`, org `jalasoft`) so no
+Azure DevOps-specific configuration lives in this GitHub-hosted repository. Authentication is
+interactive (browser login on first tool call). Re-create on another machine with:
+
+```bash
+claude mcp add -s user azure-devops -- cmd /c npx -y @azure-devops/mcp jalasoft
+```

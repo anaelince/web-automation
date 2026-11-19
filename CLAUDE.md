@@ -16,6 +16,19 @@ Single developer. Push directly to `main` — no branches/PRs.
 **Site under test:** `https://demoqa.com` (Book Store)  
 **Base URL env var:** `BASE_URL` in `.env`
 
+### Project conventions (migrated from `.kiro/steering/project-context.md`)
+
+- Write documentation and code examples in English.
+- Store published course material under `docs/`.
+- Use Playwright and TypeScript for browser automation examples.
+- Use GitHub for source control, collaboration, and CI/CD.
+- Keep secrets, local environment files, reports, and generated Playwright artifacts out of version control.
+- Prefer repository-local guidance (`CLAUDE.md`, `.claude/rules/`, `.claude/skills/`) over settings from unrelated workspaces.
+
+**Path-scoped rules** in `.claude/rules/` (former Kiro manual steering) load automatically
+when matching files are touched: `basepage-contract`, `path-aliases`, `playwright-config`,
+`tech-stack`, `pptx-workflow`. Use the `framework-reference` skill to load all framework rules at once.
+
 ---
 
 ## Architecture — Site-Based Layers
@@ -26,10 +39,11 @@ Every source file belongs to a site-specific subfolder:
 src/api/sites/{site}/{client|controllers|endpoints|models|mocks}
 src/ui/pages/sites/{site}/{PageObject}.ts
 src/data/sites/{site}/auth.data.ts
+src/fixtures/sites/{site}/{site}.fixtures.ts
 tests/ui/smoke/sites/{site}/{feature}/TC{N}-{name}.spec.ts
 ```
 
-`BasePage.ts` is the only shared file outside `sites/`.
+`BasePage.ts` and `src/fixtures/index.ts` (site-agnostic fixtures only) are the only shared files outside `sites/`.
 
 **Active sites:** `demoqa` · `saucedemo` · `automationexercise`
 
@@ -43,7 +57,8 @@ Always use aliases — never relative imports (`./` or `../`):
 @pages/sites/{site}/{Page}        → src/ui/pages/sites/{site}/{Page}.ts
 @api/sites/{site}/client/ApiClient → src/api/sites/{site}/client/ApiClient.ts
 @data/sites/{site}/auth.data      → src/data/sites/{site}/auth.data.ts
-@fixtures                         → src/fixtures/index.ts
+@fixtures                         → src/fixtures/index.ts (shared base — site fixtures extend it)
+@fixtures/sites/{site}/{site}.fixtures → src/fixtures/sites/{site}/{site}.fixtures.ts
 @config/*                         → src/config/*
 ```
 
@@ -72,7 +87,7 @@ For the **full rule set** load: `@docs/agents/claude/skill-reference.md`
 
 ### Code quality
 - Imports: path aliases only — no `./` or `../`
-- `test` and `expect`: import from `@fixtures`, not `@playwright/test`
+- `test` and `expect`: import from the site fixture file `@fixtures/sites/{site}/{site}.fixtures` — not `@playwright/test`, not `@fixtures`
 - No hardcoded credentials — use `@data/sites/{site}/auth.data`
 - No PO instantiation in `beforeEach` — use Playwright fixtures
 
@@ -113,6 +128,7 @@ For the **full rule set** load: `@docs/agents/claude/skill-reference.md`
 | Data + teardown | `created<Resource>` | `createdBook` |
 | Cleanup fixture | `clean<Resource>` | `cleanBookshelf` |
 | Mock fixture | `mock<Resource>` | `mockBooks` |
+| Worker-scoped identity/resource | `worker<Resource>` | `workerUser` |
 
 ---
 

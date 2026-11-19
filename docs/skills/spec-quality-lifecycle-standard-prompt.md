@@ -621,3 +621,140 @@ Fix:   Add expect(profilePage.usernameValue).toBeVisible() immediately after nav
    | Review TC quality and anti-flakiness patterns | `spec-quality-lifecycle-standard` | `"review tc quality"` |
 
 
+
+---
+
+## Revision 2 — TC lifecycle orchestration (2026-11-18)
+
+**Decision records:** `docs/decisions/ADR-002-spec-data-standard.md` ·
+`docs/decisions/ADR-003-spec-requirements-standard.md`
+
+Apply these changes to the EXISTING `spec-quality-lifecycle-standard/SKILL.md`. Do not
+remove rules R1–R10. This revision makes the skill the **domain orchestrator of the full TC
+lifecycle**, from specification to verification.
+
+**Size budget:** the skill must stay under 400 lines. Add only the orchestration table, the
+Lifecycle mode, and the reinforcements below. If it exceeds 400 lines, report it and move
+the "Anti-flakiness quick reference" to `docs/wiki/` instead of trimming rules.
+
+### Two orchestration levels
+
+| Level | Skill | Orchestrates |
+|-------|-------|--------------|
+| Framework hub | `automation-architect` | All layers: POM, code, organisation, API, git, docs |
+| TC lifecycle domain | `spec-quality-lifecycle-standard` | A test case from definition to verification |
+
+### 1. Replace the "Domain orchestration" table in Project Context
+
+```markdown
+### Domain orchestration — TC lifecycle phases
+
+| # | Phase | Skill | Question answered |
+|---|-------|-------|-------------------|
+| 1 | Define | `spec-requirements-standard` | Is the TC specified: traceable, exact oracles, postconditions, automatable? |
+| 2 | Data | `spec-data-standard` M1–M4 | Is the data isolated, typed, portable, and the source of expected values? |
+| 3 | Setup/Teardown | `api-setup-teardown-standard` | Does every created state have a fixture with teardown? |
+| 4 | Page Objects | `ui-pom-standard` | Do the Page Objects follow the POM pattern (structure, getters, actions, no assertions)? |
+| 5 | Body | this skill R1–R10 | Preconditions asserted, web-first, no waits, independent, specific? |
+| 6 | Verify | `spec-data-standard` M5 | Does it stay green in parallel, repeatedly, and per environment? |
+
+A phase runs only if the previous phase has no ERROR for the same TC. Report the blocking
+phase instead of continuing.
+```
+
+### 2. Update the "Domain boundary" table
+
+Add rows:
+
+| Concern | Owner skill |
+|---------|-------------|
+| TC specification document (`docs/test-cases/**`) | `spec-requirements-standard` |
+| Test data isolation, sourcing, environments, expected-value source | `spec-data-standard` |
+
+Keep R7 (test independence inside spec files) in this skill. Data isolation across workers
+belongs to `spec-data-standard` R1.
+
+### 3. Add Mode: Lifecycle — end-to-end for one TC
+
+```markdown
+### Mode: Lifecycle — Define → Verify for one TC
+
+**Triggers:** `"tc lifecycle <TC>"` · `"automate tc end to end"` · `"full tc lifecycle"`
+
+**When to use:** Taking one TC from its specification to verified automation.
+
+**Steps:**
+1. Phase 1: `spec-requirements-standard` M0 → M2 if not Ready → M4 handoff
+2. Phase 2: `spec-data-standard` M0 → M1–M4 on the data in the handoff
+3. Phase 3: `api-setup-teardown-standard` (Add mode if a controller or fixture is missing)
+4. Phase 4: `ui-pom-standard` on the Page Objects used by the TC
+5. Phase 5: Create mode (new TC) or Enforce mode (existing TC) with R1–R10
+6. Phase 6: `spec-data-standard` M5 on the TC
+
+**Output:**
+[spec-quality-lifecycle-standard] LIFECYCLE — TC{N}
+1 Define        ✅ Ready (score <n>%)        | ❌ blocked: <rule>
+2 Data          ✅ Level <n>                 | ❌ blocked: <rule>
+3 Setup/Teard.  ✅                           | ❌ blocked: <rule>
+4 Page Objects  ✅                           | ❌ blocked: <rule>
+5 Body          ✅ 0 violations              | ❌ <n> violations
+6 Verify        ✅ HERMETIC (<passed>/<total>) | ❌ NOT HERMETIC
+```
+
+### 4. Reinforce Create mode
+
+Step 0 reads the `spec-requirements-standard` M4 handoff block when it exists, instead of
+collecting parameters by hand. Add these parameters:
+- `dataSource` per data item: `created` · `mock` · `dataset` · `discovery`
+- `expectedValues`: the exact oracles from the handoff `steps` block
+
+Step 3 asserts each oracle with a value matcher (`toHaveText`, `toHaveValue`, `toHaveURL`,
+`toHaveCount` on owned data). Use `toBeVisible()` alone only for structural checks.
+
+If no handoff exists, run phase 1 first. Never invent an oracle.
+
+### 5. Reinforce R10 — ASSERTION_SPECIFICITY
+
+Add to the condition: *"…or the expected value has no controlled source (see
+`spec-data-standard` R13)."* Add to Enforce mode step 4: *"cross-check R10 with
+`spec-data-standard` R13."*
+
+### 6. Hub updates (automation-architect/SKILL.md)
+
+1. Update the registry Domain of `spec-quality-lifecycle-standard` to
+   `TC lifecycle orchestrator · body quality · assertions · selectors · waits`
+2. **Mode 7 — TC Quality Review**: rename to **Mode 7 — TC Lifecycle & Quality** and add the
+   triggers of the Lifecycle mode and of both new sub-skills. Mode count stays at 7 of 10
+3. **Inter-skill execution order** (Mode 1):
+   `spec-requirements-standard` (report) → `ui-pom-standard` → `spec-code-standard` →
+   `spec-organisation-standard` → `api-setup-teardown-standard` → `spec-data-standard` →
+   `spec-quality-lifecycle-standard` → `git-workflow-docs-standard`
+
+---
+
+## Revision 3 — Lifecycle follows the test, debugging is cross-cutting (2026-11-19)
+
+**Why:** the 6 phases of Revision 2 mixed three kinds of things — lifecycle stages (Define,
+Verify), infrastructure layers (Setup/Teardown, Page Objects) and parts of the test code
+(Data, Body) — so the flow did not read naturally and "Page Objects" was forced as a phase.
+The lifecycle now follows the test itself (Arrange · Act · Assert) wrapped in Specify and Run,
+and each phase lists the skills that live in it. It also doubles as the module map of the course.
+
+Replace the "Domain orchestration" table of Revision 2 with:
+
+| # | Phase | Question answered | Skills (rules) | Course topics |
+|---|-------|-------------------|----------------|---------------|
+| 1 | Specify | What is tested, with which exact oracle? | `spec-requirements-standard` (Q1–Q13) | TC specification · coverage |
+| 2 | Arrange | With which data, from which state — and how is it restored? | `spec-data-standard` (M1–M3) · `api-setup-teardown-standard` | Data · setup / teardown · API layer |
+| 3 | Act | Does the test interact robustly? | `ui-pom-standard` (POM structure) · this skill R3 waits, R5 locators · locator skill (future) | Understanding the DOM · selector strategies · implicit vs explicit waits · timing & sync (polling) |
+| 4 | Assert | Does it check the exact value and explain the failure? | this skill R1, R4, R6, R9, R10 · `spec-data-standard` M4 | Robust, descriptive assertions · soft vs hard · explicit vs implicit |
+| 5 | Run | Green in parallel, repeatedly, per environment, with the right selection? | `spec-data-standard` M5 · tags (R11) | Skip / only / conditional execution · parallel · environments |
+
+- **Debugging is cross-cutting**, not a final phase: each phase reports the blocking rule and
+  the real cause. Example from the reference scenario: an unchecked HTTP status in Arrange hid a
+  401 until a TypeError in setup.
+- **Reporting** (HTML, e-mail, artifacts) moves to the CI module, together with the CI matrix
+  and per-environment secrets (Environment Readiness Map E4, E10).
+- Teardown (postconditions) is owned by Arrange even though it executes after Assert.
+- Lifecycle mode output becomes 5 rows: Specify · Arrange · Act · Assert · Run.
+- Hub Mode 7 routing: specification → phase 1; data robustness → phases 2, 4 (M4), 5 (M5).

@@ -37,22 +37,106 @@
 
 ### TC02: Add a book to the user's collection
 
-**Prerequisite:** User is not yet logged in. The user's collection must be empty at test start.
-> The `cleanBookshelf` fixture enforces this automatically: it queries the user's collection
-> via API before the test runs and deletes any residual books from a previous failed run.
+| Field | Value |
+|-------|-------|
+| Requirement / AC | REQ-BS-02 · AC1: an authenticated user can add a catalog book to their collection, and the book appears in their profile |
+| Objective | Verify that adding a book from its detail page persists it in the user's collection, the core value of the Book Store for a logged-in user |
+| Priority | High |
+| Suite | smoke |
+| Type | positive |
+| Tags | `@smoke` · `@mutates-data` |
+| Automation | Automatable — UI flow; identity and collection state provisioned via API |
 
-**Steps:ate to `https://demoqa.com/books`.
-2. Click the **"Login"** button.
-3. Login with correct credentials.
-4. Assert the Book Store catalog page is displayed and the book list contains at least one entry.
-5. Click on the title of the first book in the list (e.g., *Git Pocket Guide*).
-6. Assert the book detail page is loaded and the **Title** field is visible and non-empty.
-7. Assert the **"Add To Your Collection"** button is visible and enabled.
-8. Click the **"Add To Your Collection"** button.
-9. Assert a browser alert appears with the message `"Book added to your collection."`.
-10. Accept the alert.
-11. Navigate to `https://demoqa.com/profile`.
-12. Assert the books table contains a row with the title that was added in step 3.
+**Preconditions**
+
+| # | State | Provisioned by | Scope |
+|---|-------|----------------|-------|
+| P1 | User `{user}` exists and is not logged in | API — `workerUser` fixture (POST /Account/v1/User) | worker |
+| P2 | `{user}` has an empty collection | API — `cleanBookshelf` fixture | test |
+
+**Test data**
+
+| Item | Value or generation rule | Class | Source |
+|------|--------------------------|-------|--------|
+| `{user}.username` | `qa_` + parallel index + timestamp + random suffix | Transactional | factory |
+| `{user}.password` | Generated; meets the demoqa password policy | Transactional | factory |
+| `{book}` | First entry of GET /BookStore/v1/Books (`title`, `author`) | Reference | discovery |
+| Alert text | `Book added to your collection.` | Reference | dataset (product message) |
+
+**Steps**
+
+| # | Action | Expected result (oracle) |
+|---|--------|--------------------------|
+| 1 | Open `/books` | Heading `Book Store` is visible · first row title = `{book.title}` |
+| 2 | Click **Login** in the sidebar | Login form is visible |
+| 3 | Log in as `{user}` | URL is `/profile` · username value = `{user.username}` |
+| 4 | Open `/books` | First row title = `{book.title}` |
+| 5 | Click the `{book.title}` link | Detail page Title value = `{book.title}` · **Add To Your Collection** is enabled |
+| 6 | Click **Add To Your Collection** and accept the alert | Alert text = `Book added to your collection.` |
+| 7 | Open `/profile` | Exactly 1 row with title `{book.title}` · that row contains `{book.author}` |
+
+**Postconditions**
+
+| State after the test | Cleanup | Scope |
+|----------------------|---------|-------|
+| `{user}` collection is empty | `cleanBookshelf` teardown deletes the books of `{user}` (token regenerated) | only `{user}`, owned by this worker |
+| `{user}` no longer exists after the worker ends | `workerUser` teardown (DELETE /Account/v1/User) | worker |
+
+**Risks / notes** — demoqa allows one active token per user: the UI login in step 3 invalidates
+the API token, so teardown must regenerate it. A shared user across workers causes login
+collisions and 401 errors (see `docs/course/evidence/m6/data-m5-baseline.txt`).
+
+**Change log (spec-requirements-standard M2, 2026-11-18)**
+- Q1 — Added requirement/AC, priority, suite, type, tags, automation decision
+- Q2 — Added objective
+- Q3 — Preconditions state the provisioning method and scope (worker identity, clean collection)
+- Q4 — Credentials and book are declared data items with class and source; no "e.g."
+- Q5 — One action per step, each with its oracle (login no longer without result)
+- Q6 — "at least one entry" / "visible and non-empty" replaced by exact `{book.title}` / `{book.author}`
+- Q9 — Postconditions with scoped cleanup added
+- Q11 — Absolute URLs replaced by relative paths
+- Q12 — Automation decision stated
+- Q13 — Lost step 1 restored; "title added in step 3" replaced by the captured value `{book.title}`
+
+**Automation handoff (M4)**
+
+```yaml
+tc: TC02
+title: Add a book to the user's collection
+suite: smoke
+tags: ['@smoke', '@mutates-data']
+automation: automatable
+fixtures:
+  identity: workerUser          # worker-scoped identity (spec-data-standard M1)
+  state: cleanBookshelf         # empty collection before, scoped cleanup after
+  discovery: bookController     # catalog read for the expected book
+data:
+  - name: user
+    class: transactional
+    source: factory             # qa_ prefix, unique per worker
+  - name: book
+    class: reference
+    source: discovery           # bookController.getAll()[0]
+captured: []
+steps:
+  - action: open /books
+    oracle: heading "Book Store" visible; first row title = book.title
+  - action: click Login
+    oracle: login form visible
+  - action: login as user
+    oracle: url /profile; username value = user.username
+  - action: open /books
+    oracle: first row title = book.title
+  - action: click book.title
+    oracle: detail title = book.title; add button enabled
+  - action: add to collection, accept alert
+    oracle: alert text = "Book added to your collection."
+  - action: open /profile
+    oracle: exactly 1 row with book.title; row contains book.author
+postconditions:
+  - collection of user emptied by cleanBookshelf (owned identity)
+  - user deleted by workerUser teardown
+```
 
 ---
 

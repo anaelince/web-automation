@@ -2,7 +2,7 @@
 
 > Load this file with `@docs/agents/claude/skill-reference.md` when you need
 > the full rule set for a specific skill. Each section maps to a Kiro skill.
-> Source of truth: the SKILL.md files in `.kiro/skills/`
+> Source of truth: the SKILL.md files in `.claude/skills/` (mirrored from `.kiro/skills/`)
 
 ---
 
@@ -48,7 +48,7 @@ belong in specs only.
 
 ## api-setup-teardown-standard
 
-Governs `src/api/sites/{site}/**` and `src/fixtures/index.ts` (teardown concern).
+Governs `src/api/sites/{site}/**` and `src/fixtures/sites/{site}/{site}.fixtures.ts` (teardown concern).
 
 **R1 API_CLIENT_IS_ONLY_HTTP_ENTRY_POINT (ERROR, AUTO-FIX):** Only `ApiClient` calls
 `request.get/post/put/delete`. All other layers delegate to `ApiClient`.  
@@ -97,10 +97,10 @@ No inline `// Step N:` comments. No JSDoc `@steps`.
 Governs spec code quality, imports, fixtures, and data hygiene.
 
 **R1 PATH_ALIASES_ON_ALL_IMPORTS (ERROR, AUTO-FIX):** No relative imports anywhere.  
-**R2 IMPORT_FROM_FIXTURES (ERROR, AUTO-FIX):** `test` and `expect` from `@fixtures`.  
+**R2 IMPORT_FROM_FIXTURES (ERROR, AUTO-FIX):** `test` and `expect` from the site fixture file `@fixtures/sites/{site}/{site}.fixtures`.  
 **R3 NO_MANUAL_BEFOREEACH_FOR_PO_INIT (ERROR, AUTO-FIX):** No `new Page(page)` in
 `beforeEach` — extract to fixture.  
-**R4 PO_REGISTERED_IN_FIXTURE (ERROR, AUTO-FIX):** Every used PO is in `src/fixtures/index.ts`.  
+**R4 PO_REGISTERED_IN_FIXTURE (ERROR, AUTO-FIX):** Every used PO is in `src/fixtures/sites/{site}/{site}.fixtures.ts` (`src/fixtures/index.ts` holds site-agnostic fixtures only).  
 **R5 TESTS_WRAPPED_IN_DESCRIBE (ERROR/WARNING, AUTO-FIX):** Every `test()` inside
 a `describe()` with a meaningful name.  
 **R6 NO_CROSS_SPEC_IMPORTS (ERROR, AUTO-FIX):** No imports from other spec files.  
@@ -155,7 +155,7 @@ Description: lowercase, no period at end.
 
 | Changed | Update |
 |---|---|
-| `.kiro/skills/**` | `README.md §9` |
+| `.claude/skills/**` / `.kiro/skills/**` | `README.md §9` |
 | `src/api/sites/{site}/` | `docs/wiki/api/{site}-api-layer.md` |
 | New `*.spec.ts` | `docs/test-cases/{site}/` |
 | `playwright.config.ts` / `package.json` | `README.md §3/§5` |
