@@ -111,13 +111,17 @@ web-automation/
 │   │           ├── endpoints/    # URL constants (no HTTP logic)
 │   │           └── models/       # TypeScript interfaces for payloads
 │   ├── fixtures/
-│   │   └── index.ts              # Playwright fixture definitions (all sites)
+│   │   ├── index.ts              # Shared, site-agnostic base fixtures
+│   │   └── sites/                # One fixture file per site (extends the base)
+│   │       ├── saucedemo/saucedemo.fixtures.ts
+│   │       ├── demoqa/demoqa.fixtures.ts          # incl. workerUser, cleanBookshelf
+│   │       └── automationexercise/automationexercise.fixtures.ts
 │   ├── data/
 │   │   └── sites/                # Test data organised by target site
 │   │       ├── saucedemo/        # auth.data.ts (users)
-│   │       └── demoqa/           # auth.data.ts (bookStoreUsers)
+│   │       └── demoqa/           # auth.data.ts, user.factory.ts (unique test identities)
 │   ├── config/
-│   │   └── env.ts                # Environment variable validation
+│   │   └── env.ts                # Multi-environment loading (TEST_ENV) + fail-fast validation
 │   └── helpers/                  # (reserved for shared utilities)
 │
 ├── tests/                        # Spec files
@@ -131,11 +135,20 @@ web-automation/
 ├── docs/
 │   ├── README.md                 # Documentation index
 │   ├── course/                   # Course presentation slides (M1–M6)
-│   ├── skills/                   # Meta-prompts for creating/updating Kiro skills
+│   ├── decisions/                # Architecture Decision Records (ADRs)
+│   ├── skills/                   # Meta-prompts for creating/updating AI skills
 │   ├── test-cases/               # Test case specifications per site
 │   │   └── demoqa/
 │   └── wiki/                     # Living framework documentation
-│       └── api/                  # API layer reference
+│       ├── api/                  # API layer reference
+│       └── anti-flakiness-reference.md
+│
+├── .claude/                      # Claude Code configuration (CLAUDE.md at repo root)
+│   ├── skills/                   # Claude skills (same set as .kiro/skills + spec-data,
+│   │                             #   spec-requirements, framework-reference)
+│   ├── rules/                    # Path-scoped rules (former Kiro manual steering)
+│   ├── hooks/                    # docs-sync-on-push.cjs (PostToolUse after git push)
+│   └── settings.json             # Shared permissions + hook registration
 │
 ├── .kiro/
 │   ├── skills/                   # Kiro AI skill definitions
@@ -181,10 +194,15 @@ get searchInput() {
 
 ### Fixtures
 
-Page Object instantiation is handled by Playwright fixtures (`src/fixtures/index.ts`).
-Tests never create `new Page()` directly — they declare a fixture as a parameter.
+Page Object instantiation is handled by Playwright fixtures. Each site has its own
+fixture file (`src/fixtures/sites/{site}/{site}.fixtures.ts`) that extends the shared,
+site-agnostic base in `src/fixtures/index.ts` and sets Playwright's `baseURL` to that
+site's URL. Tests never create `new Page()` directly — they declare a fixture as a
+parameter and import `test`/`expect` from their site's fixture file.
 
 ```typescript
+import { test, expect } from '@fixtures/sites/automationexercise/automationexercise.fixtures';
+
 test('TC9: Search Product', async ({ homePage }) => {
   // homePage is already instantiated and navigated by the fixture
 });
@@ -226,13 +244,25 @@ Copy `.env.example` and fill in the values:
 cp .env.example .env
 ```
 
-The required variables are defined and validated in `src/config/env.ts`.
-The test run will fail with a descriptive error if any required variable is missing.
+To target another environment, create `.env.<name>` (e.g. `.env.qa`) and select it
+with `TEST_ENV`:
 
-## Kiro AI Skills
+```bash
+TEST_ENV=qa npx playwright test
+```
 
-This project includes a set of Kiro AI skills under `.kiro/skills/` that enforce
-and apply the framework's conventions automatically.
+With `TEST_ENV` unset, `.env.local` is loaded, falling back to `.env`. All `.env.*`
+files except `.env.example` are git-ignored; `.env.example` documents every variable.
+
+The variables are defined and validated in `src/config/env.ts`.
+The test run will fail with a descriptive error if the environment file or any
+required variable is missing, or if a URL variable is not a valid http(s) URL.
+
+## AI Skills
+
+This project includes AI skills that enforce and apply the framework's conventions
+automatically — for Claude Code under `.claude/skills/` and for Kiro under `.kiro/skills/`.
+Skills marked *(Claude only)* are not yet available in Kiro.
 
 | Skill | Purpose | Load when... |
 |-------|---------|--------------|
@@ -240,11 +270,17 @@ and apply the framework's conventions automatically.
 | `api-setup-teardown-standard` | Enforces API layer structure, teardown contract, and token refresh rules | Implementing API-based setup/teardown or scaffolding a new API resource |
 | `spec-organisation-standard` | Enforces TC folder structure and naming | Creating or reorganising test cases |
 | `spec-code-standard` | Enforces spec code quality and site-layer placement | Writing or reviewing spec files |
-| `spec-quality-lifecycle-standard` | Enforces TC lifecycle quality: preconditions, assertions, selectors, wait strategies, anti-flakiness | Writing, reviewing, or debugging test cases |
+| `spec-quality-lifecycle-standard` | Enforces TC lifecycle quality: preconditions, assertions, selectors, wait strategies, anti-flakiness. Orchestrates `spec-requirements-standard` and `spec-data-standard` | Writing, reviewing, or debugging test cases |
+| `spec-requirements-standard` *(Claude only)* | Writes and assesses TC specifications in `docs/test-cases/**`: traceability, preconditions, deterministic expected results, automation readiness | Before automating a TC or when writing TCs from requirements |
+| `spec-data-standard` *(Claude only)* | Test data robustness: data maturity levels, parallel isolation, typed/data-driven data, multi-environment portability, verification runs | Tests that create or read data, enabling parallel runs, adding an environment |
 | `git-workflow-docs-standard` | Validates and executes git workflow + docs sync | Before committing, pushing, or opening a PR |
-| `automation-architect` | Hub — orchestrates all 6 sub-skills | Full architecture review or scaffolding a new feature |
+| `framework-reference` *(Claude only)* | Loads path aliases, Playwright config, tech stack and BasePage contract at once | Scaffolding a feature or reviewing architecture |
+| `automation-architect` | Hub — orchestrates the sub-skills above | Full architecture review or scaffolding a new feature |
 
-**Example usage in Kiro chat:**
+See [ADR-002](docs/decisions/ADR-002-spec-data-standard.md) and
+[ADR-003](docs/decisions/ADR-003-spec-requirements-standard.md) for the rationale of the two newest skills.
+
+**Example usage in chat:**
 
 ```
 "apply architecture"       → runs all skills on the project (full pipeline)
@@ -252,6 +288,8 @@ and apply the framework's conventions automatically.
 "scaffold api for books"   → scaffolds API client, controller, model, endpoints + fixture
 "review tc quality"        → scans all specs for flaky patterns and assertion issues
 "write tc"                 → scaffolds a new quality TC from scratch
+"write test case"          → writes a TC specification from a requirement
+"assess test data"         → reports the data maturity level of the suite
 "check git"                → validates branch name and commit messages
 "git workflow"             → commit + push + open PR following conventions
 "update docs"              → syncs README + wiki with current project state (Mode 5)
@@ -264,6 +302,11 @@ and apply the framework's conventions automatically.
 ## Git Workflow
 
 This project follows a structured git workflow enforced by the `git-workflow-docs-standard` skill.
+
+> **Project override:** this course repository has a single developer, so changes are
+> pushed directly to `main` (no branches/PRs). Commit message conventions still apply.
+> See [ai-governance.md](docs/wiki/ai-governance.md). The branch/PR flow below is the
+> standard for team projects.
 
 **Branch naming:**
 ```

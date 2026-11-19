@@ -32,15 +32,15 @@ All other layers delegate HTTP calls to this class (enforced by **R1**).
 **Responsibilities:**
 - Wraps `APIRequestContext` from `@playwright/test`
 - Manages the Bearer token: `setAuthToken(token)` stores it and `buildHeaders()` injects it as `Authorization: Bearer {token}` on every request
-- Surfaces HTTP failures: `delete()` checks `response.ok()` and throws with status + body on non-2xx (enforced by **R11**)
+- Surfaces HTTP failures: `get()`, `post()` and `delete()` check `response.ok()` and throw with method, URL, status + body on non-2xx (enforced by **R11**)
 
 **Public API:**
 
 | Method | Signature | Description |
 |--------|-----------|-------------|
 | `setAuthToken` | `(token: string): void` | Stores the Bearer token for all subsequent requests |
-| `get` | `<T>(url: string): Promise<T>` | GET request — returns parsed JSON as `T` |
-| `post` | `<T>(url: string, data: unknown): Promise<T>` | POST request with JSON body — returns parsed JSON as `T` |
+| `get` | `<T>(url: string): Promise<T>` | GET request — returns parsed JSON as `T`; throws on non-2xx |
+| `post` | `<T>(url: string, data: unknown): Promise<T>` | POST request with JSON body — returns parsed JSON as `T`; throws on non-2xx |
 | `delete` | `(url, options?): Promise<void>` | DELETE — supports optional body (`data`) and query params (`params`); throws on non-2xx |
 
 **Key design decisions:**
@@ -58,7 +58,8 @@ URL constants only — no HTTP logic, no imports from `client/` (enforced by **R
 | Constant | Value | Used by |
 |----------|-------|---------|
 | `AccountEndpoints.generateToken` | `'/Account/v1/GenerateToken'` | `AccountController.generateToken()` |
-| `AccountEndpoints.user(userId)` | `` `/Account/v1/User/${userId}` `` | `AccountController.getUserBooks()` |
+| `AccountEndpoints.users` | `'/Account/v1/User'` | `AccountController.createUser()` |
+| `AccountEndpoints.user(userId)` | `` `/Account/v1/User/${userId}` `` | `AccountController.getUserBooks()`, `AccountController.deleteUser()` |
 
 ### `books.endpoints.ts`
 
@@ -79,6 +80,8 @@ TypeScript interfaces only — no classes, no business logic (enforced by **R6**
 |-----------|---------|
 | `GenerateTokenPayload` | Request body for `POST /Account/v1/GenerateToken` — `{ userName, password }` |
 | `TokenResponse` | Response from token endpoint — `{ token, expires, status, result }` |
+| `CreateUserPayload` | Request body for `POST /Account/v1/User` — `{ userName, password }` |
+| `CreateUserResponse` | Response from `POST /Account/v1/User` — `{ userID, username, books[] }` |
 | `UserResponse` | Response from `GET /Account/v1/User/{id}` — `{ userId, username, books[] }` |
 
 ### `book.model.ts`
@@ -103,6 +106,8 @@ Covers authentication and user-profile operations against demoqa's Account API.
 
 | Method | Endpoint | Auth required | Returns |
 |--------|----------|--------------|---------|
+| `createUser(userName, password)` | `POST /Account/v1/User` | No | `string` (new user ID) |
+| `deleteUser(userId)` | `DELETE /Account/v1/User/{userId}` | Yes (token of that user) | `void` |
 | `generateToken(userName, password)` | `POST /Account/v1/GenerateToken` | No | `string` (Bearer token) |
 | `getUserBooks(userId)` | `GET /Account/v1/User/{userId}` | Yes | `Array<{ isbn }>` |
 
@@ -127,17 +132,34 @@ Covers all BookStore CRUD operations against demoqa's BookStore API.
 
 ---
 
-## Fixture Integration (`src/fixtures/index.ts`)
+## Fixture Integration (`src/fixtures/sites/demoqa/demoqa.fixtures.ts`)
 
-### `bookController` — setup-only (no teardown)
+### `workerUser` — worker-scoped identity (setup + teardown)
 
-Provides an authenticated `BookController` for read operations during tests. Generates a
-token at setup and injects the controller; no cleanup is performed after the test.
+Each Playwright worker gets its own demoqa user, so parallel tests never share a
+bookshelf (spec-data-standard R1–R3).
+
+```
+SETUP (once per worker)
+  buildBookStoreUser(parallelIndex)  → unique prefixed username + policy-compliant password
+                                       (src/data/sites/demoqa/user.factory.ts)
+  createUser(userName, password)     → userId
+
+TEARDOWN (after the worker's last test)
+  generateToken()                    → token of this user
+  deleteUser(userId)
+```
+
+### `bookController` — setup-only (no auth, no teardown)
+
+Provides an unauthenticated `BookController` for public catalog reads (e.g. `getAll()`).
+It deliberately does **not** generate a token: demoqa keeps one active token per user, so a
+second token generated in the same test would invalidate `cleanBookshelf`'s token (spec-data-standard R15).
 
 ### `cleanBookshelf` — setup + teardown (implements R4 + R10)
 
 Implements the **API + UI Hybrid Fixture** pattern to guarantee a clean shelf state both
-before and after a test that also performs a UI login.
+before and after a test that also performs a UI login. It operates on `workerUser`.
 
 ```
 SETUP (before test body)
