@@ -14,6 +14,19 @@ export interface TokenResponse {
   result: string;
 }
 
+/** Request body for POST /Account/v1/User (create user) */
+export interface CreateUserPayload {
+  userName: string;
+  password: string;
+}
+
+/** Response shape for POST /Account/v1/User */
+export interface CreateUserResponse {
+  userID: string;
+  username: string;
+  books: Array<{ isbn: string }>;
+}
+
 /** Response shape for GET /Account/v1/User/{userId} */
 export interface UserResponse {
   userId: string;

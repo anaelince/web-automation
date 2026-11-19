@@ -1,54 +1,63 @@
-import { test, expect } from '@fixtures';
-import { bookStoreUsers } from '@data/sites/demoqa/auth.data';
+import { test, expect } from '@fixtures/sites/demoqa/demoqa.fixtures';
 
+// Spec: docs/test-cases/demoqa/book-store-crud-test-cases.md — TC02 (automation handoff M4)
 test.describe('Books', () => {
   test(
     'TC02: Add a book to the user\'s collection',
-    async ({ bookStorePage, bookStoreLoginPage, bookDetailPage, profilePage, cleanBookshelf }) => {
-      // cleanBookshelf is injected for its post-test API teardown (deleteAllBooks).
+    { tag: ['@smoke', '@mutates-data'] },
+    async ({
+      workerUser,
+      bookController,
+      cleanBookshelf,
+      bookStorePage,
+      bookStoreLoginPage,
+      bookDetailPage,
+      profilePage,
+    }) => {
+      // cleanBookshelf empties workerUser's collection before and after the test.
       void cleanBookshelf;
 
-      let firstBookTitle = '';
+      // Reference data discovered via API — the expected values of this TC.
+      const [book] = await bookController.getAll();
+      expect(book, 'catalog API returned at least one book').toBeDefined();
+      const { title, author } = book!;
 
-      await test.step('Navigate to Book Store catalog', async () => {
-        // bookStorePage fixture already navigated to /books (unauthenticated)
+      await test.step('Open /books — heading and first row title match the catalog', async () => {
         await expect(bookStorePage.pageHeading).toBeVisible();
+        await expect(bookStorePage.firstBookTitleLink).toHaveText(title);
       });
 
-      await test.step('Click Login and authenticate with valid credentials', async () => {
+      await test.step('Click Login — login form is visible', async () => {
         await bookStorePage.loginLink.click();
-        await bookStoreLoginPage.login(bookStoreUsers.appUser.username, bookStoreUsers.appUser.password);
-        // After login demoqa redirects to /profile — navigate back to the catalog
+        await expect(bookStoreLoginPage.loginButton).toBeVisible();
+      });
+
+      await test.step('Log in as the worker user — profile shows that username', async () => {
+        await bookStoreLoginPage.login(workerUser.username, workerUser.password);
+        await expect(profilePage.currentPage).toHaveURL(/\/profile$/);
+        await expect(profilePage.usernameValue).toHaveText(workerUser.username);
+      });
+
+      await test.step('Open /books — first row title matches the catalog', async () => {
         await bookStorePage.navigate('/books');
+        await expect(bookStorePage.firstBookTitleLink).toHaveText(title);
       });
 
-      await test.step('Verify catalog is displayed with at least one book', async () => {
-        await expect(bookStorePage.bookList.first()).toBeVisible();
-      });
-
-      await test.step('Click on the first book to open its detail page', async () => {
-        firstBookTitle = await bookStorePage.getFirstBookTitle();
+      await test.step('Open the book — detail title matches and Add is enabled', async () => {
         await bookStorePage.clickFirstBook();
-      });
-
-      await test.step('Assert book detail page is loaded with Title field visible and non-empty', async () => {
-        await expect(bookDetailPage.backToBookStoreButton).toBeVisible();
-        await expect(bookDetailPage.bookInfoBlock).toBeVisible();
-      });
-
-      await test.step('Assert "Add To Your Collection" button is visible and enabled', async () => {
-        await expect(bookDetailPage.addToCollectionButton).toBeVisible();
+        await expect(bookDetailPage.titleValue).toHaveText(title);
         await expect(bookDetailPage.addToCollectionButton).toBeEnabled();
       });
 
-      await test.step('Click "Add To Your Collection" and confirm browser alert message', async () => {
+      await test.step('Add To Your Collection — alert confirms the addition', async () => {
         const alertMessage = await bookDetailPage.addToCollection();
         expect(alertMessage).toBe('Book added to your collection.');
       });
 
-      await test.step('Navigate to profile and verify the book appears in the collection', async () => {
+      await test.step('Open /profile — exactly one row with the book title and author', async () => {
         await profilePage.navigate('/profile');
-        await expect(profilePage.bookRowByTitle(firstBookTitle)).toBeVisible();
+        await expect(profilePage.bookRowByTitle(title)).toHaveCount(1);
+        await expect(profilePage.bookRowByTitle(title)).toContainText(author);
       });
     },
   );

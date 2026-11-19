@@ -1,9 +1,27 @@
 import { ApiClient } from '@api/sites/demoqa/client/ApiClient';
 import { AccountEndpoints } from '@api/sites/demoqa/endpoints/account.endpoints';
-import { GenerateTokenPayload, TokenResponse, UserResponse } from '@api/sites/demoqa/models/account.model';
+import {
+  CreateUserPayload,
+  CreateUserResponse,
+  GenerateTokenPayload,
+  TokenResponse,
+  UserResponse,
+} from '@api/sites/demoqa/models/account.model';
 
 export class AccountController {
   constructor(private readonly client: ApiClient) {}
+
+  /** Creates a new user (no auth required). Returns the new user's ID. */
+  async createUser(userName: string, password: string): Promise<string> {
+    const payload: CreateUserPayload = { userName, password };
+    const response = await this.client.post<CreateUserResponse>(AccountEndpoints.users, payload);
+    return response.userID;
+  }
+
+  /** Deletes a user (auth required — the token must belong to that user). */
+  async deleteUser(userId: string): Promise<void> {
+    await this.client.delete(AccountEndpoints.user(userId));
+  }
 
   /**
    * Exchanges username/password for a Bearer token.

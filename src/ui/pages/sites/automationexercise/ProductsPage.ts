@@ -38,7 +38,8 @@ export class ProductsPage extends BasePage {
 
   /** All product cards in the current results list (All Products or Searched Products). */
   get productCards() {
-    return this.page.locator('.product-overlay');
+    // .productinfo is the always-visible card body; .product-overlay only shows on hover.
+    return this.page.locator('.features_items .productinfo');
   }
 
   // ── Actions ──────────────────────────────────────────────────────────────

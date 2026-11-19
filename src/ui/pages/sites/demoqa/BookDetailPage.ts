@@ -33,6 +33,11 @@ export class BookDetailPage extends BasePage {
     return this.page.getByText('Title :', { exact: true });
   }
 
+  /** Value of the "Title :" field (demoqa renders it as #userName-value inside #title-wrapper). */
+  get titleValue() {
+    return this.page.locator('#title-wrapper #userName-value');
+  }
+
   // ── Actions ─────────────────────────────────────────────────────────────
 
   /**

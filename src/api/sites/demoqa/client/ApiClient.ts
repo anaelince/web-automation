@@ -23,6 +23,10 @@ export class ApiClient {
 
   async get<T>(url: string): Promise<T> {
     const response = await this.request.get(url, { headers: this.buildHeaders() });
+    if (!response.ok()) {
+      const body = await response.text().catch(() => '');
+      throw new Error(`GET ${url} failed — status ${response.status()}: ${body}`);
+    }
     return response.json() as Promise<T>;
   }
 
@@ -31,6 +35,10 @@ export class ApiClient {
       data,
       headers: this.buildHeaders(),
     });
+    if (!response.ok()) {
+      const body = await response.text().catch(() => '');
+      throw new Error(`POST ${url} failed — status ${response.status()}: ${body}`);
+    }
     return response.json() as Promise<T>;
   }
 

@@ -1,4 +1,4 @@
-import { test, expect } from '@fixtures';
+import { test, expect } from '@fixtures/sites/saucedemo/saucedemo.fixtures';
 
 test.describe('Login', () => {
   test('TC0: Valid login redirects to inventory page', async ({ inventoryPage }) => {

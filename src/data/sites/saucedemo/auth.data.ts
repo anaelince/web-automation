@@ -1,10 +1,10 @@
 import { ENV } from '@config/env';
 
 export const users = {
-  /** Primary test user — credentials sourced from environment variables */
+  /** Primary test user — SAUCEDEMO_USER_NAME / SAUCEDEMO_USER_PASSWORD (default: standard_user) */
   appUser: {
-    username: ENV.testUser.name,
-    password: ENV.testUser.password,
+    username: ENV.sauceDemoUser.name,
+    password: ENV.sauceDemoUser.password,
   },
 
   /** Site-specific accounts for negative / edge-case tests */

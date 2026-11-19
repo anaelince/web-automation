@@ -1,4 +1,4 @@
-import { test, expect } from '@fixtures';
+import { test, expect } from '@fixtures/sites/automationexercise/automationexercise.fixtures';
 
 test.describe('Products', () => {
   /**
