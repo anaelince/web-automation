@@ -7,12 +7,17 @@ description: >
   refactoring spec files or fixture files.
 
 growth-note: >
-  This skill currently governs code quality rules specific to spec files and their
-  direct dependencies (fixtures, data). If the project grows to require general
-  TypeScript code quality rules that apply across ALL src/ layers (not just specs),
-  consider splitting into spec-code-standard (spec-specific) and a new
-  code-standard skill (framework-wide). Do not expand this skill with non-spec
-  rules — create the new skill instead.
+  This skill governs code quality rules specific to spec files and their direct
+  dependencies (fixtures, data): R2–R8. Two rules already reach beyond specs and apply
+  to ALL src/ layers: R1 PATH_ALIASES_ON_ALL_IMPORTS and R9 CORRECT_SITE_LAYER_PLACEMENT.
+  The reserved skill framework-code-standard (layer: framework = all of src/, domain:
+  code — ADR-001 pattern) will own framework-wide code conventions. When it is created
+  (with its own ADR, per the Hub Growth Policy): move R1 and R9 to it and keep them
+  here as delegations (same mechanism as ui-locator-wait-standard taking R3/R5 of
+  spec-quality-lifecycle-standard); narrow this skill's Scan Scope to tests/** and
+  fixture files. Do not rename this skill. Do not expand it with non-spec rules
+  (naming, strict typing, lint, formatting across src/) — those belong to
+  framework-code-standard.
 ---
 
 ## Project Context
