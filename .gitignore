@@ -45,5 +45,9 @@ Thumbs.db
 /playwright/.cache/
 /playwright/.auth/
 
-# Microsoft Office temp files
+# Microsoft Office / LibreOffice temp and lock files
 ~$*
+.~lock.*
+
+# AI SDLC Pack adoption workspace (local only — never pushed)
+/ai-sdlc-pack/
