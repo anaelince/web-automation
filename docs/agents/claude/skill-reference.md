@@ -10,8 +10,9 @@
 
 Hub skill. Use for full pipeline reviews or scaffolding.
 
-**Full pipeline trigger:** `"apply architecture"` → runs all 6 sub-skills in order:
+**Full pipeline trigger:** `"apply architecture"` → runs the sub-skills in order:
 1. `ui-pom-standard` on PO files
+1b. `ui-locator-wait-standard` on PO files, specs, fixtures, config
 2. `spec-code-standard` on spec files + fixtures
 3. `spec-organisation-standard` on spec files
 4. `api-setup-teardown-standard` on API layer + fixtures
@@ -113,15 +114,15 @@ password — use `@data/sites/{site}/auth.data`.
 
 ## spec-quality-lifecycle-standard
 
-Governs TC body quality. Coordinates with `ui-pom-standard` (locators) and
+Governs TC body quality and orchestrates the TC lifecycle. Coordinates with `ui-pom-standard`
+(POM structure), `ui-locator-wait-standard` (locators and waits) and
 `api-setup-teardown-standard` (teardown) for the parts they own.
 
 **R1 PRECONDITION_ASSERTED (ERROR, MANUAL-FIX):** First `test.step()` must assert
 the precondition is met before any actions.  
 **R2 POSTCONDITION_GUARANTEED (ERROR, MANUAL-FIX):** Tests that mutate persistent
 state must include a `clean<Resource>` fixture parameter.  
-**R3 NO_HARDCODED_WAITS (ERROR, AUTO-FIX):** `page.waitForTimeout()` is forbidden.
-Replace with semantic waits: `expect(locator).toBeVisible()`, `waitForURL()`, etc.  
+**R3 NO_HARDCODED_WAITS → delegated** to `ui-locator-wait-standard` R13 (ADR-004).  
 **R4 WEB_FIRST_ASSERTIONS (ERROR, AUTO-FIX):** Use `expect(locator).toBeVisible()`
 not `expect(await locator.isVisible()).toBe(true)`.
 
@@ -131,8 +132,7 @@ not `expect(await locator.isVisible()).toBe(true)`.
 | `expect(await el.isVisible()).toBe(true)` | `expect(el).toBeVisible()` |
 | `expect(await page.url()).toContain('/p')` | `expect(page).toHaveURL(/\/p/)` |
 
-**R5 RESILIENT_LOCATORS (WARNING, MANUAL-FIX):** Prefer `getByRole()`, `getByLabel()`,
-`locator('[data-testid]')` over positional CSS or XPath.  
+**R5 RESILIENT_LOCATORS → delegated** to `ui-locator-wait-standard` R1–R3, R5 (ADR-004).  
 **R6 STEP_ASSERTS_RESULT (WARNING, MANUAL-FIX):** Every `test.step()` with actions
 must have at least one assertion.  
 **R7 TEST_IS_INDEPENDENT (ERROR, MANUAL-FIX):** No shared mutable state between tests.  
@@ -142,6 +142,28 @@ in `test()` body — move to POs/fixtures.
 a stable element confirming the page loaded.  
 **R10 ASSERTION_SPECIFICITY (WARNING, MANUAL-FIX):** Assert the VALUE when the TC
 says "assert value is X" — not just `.toBeVisible()`.
+
+---
+
+## ui-locator-wait-standard
+
+Lifecycle phase 3 Act (M0–M5) and phase 5 Run (M6). Governs locator expressions in
+`src/ui/pages/**`, waits in specs, polling in specs/fixtures, `testIdAttribute` and timeouts in
+`playwright.config.ts`. ADR-004.
+
+**Hierarchy (R1):** test-id contract defined and present → `getByTestId` → role → label →
+placeholder → text → alt text → title → CSS/XPath. No contract → role → label → placeholder →
+text → alt text → title → test id → CSS/XPath.
+
+| Mode | Rules |
+|---|---|
+| M0 Interaction Assessment (default, read-only) | maturity 0–4 |
+| M1 Locator Strategy | R1 LOCATOR_HIERARCHY · R2 JUSTIFIED_CSS_XPATH · R3 NO_FRAGILE_SELECTORS · R4 NO_INVENTED_ATTRIBUTES |
+| M2 Uniqueness & Composition | R5 NO_POSITIONAL_WITHOUT_RULE · R6 SCOPE_AND_FILTER · R7 FILTER_BEFORE_ITERATE · R8 AMBIGUITY_FAILS_CLEARLY |
+| M3 Action & Read Semantics | R9 ACTION_MATCHES_ELEMENT · R10 NO_ACTIONABILITY_BYPASS · R11 LOCATOR_NOT_HANDLE · R12 INTENTIONAL_READS |
+| M4 Wait Strategy | R13 NO_FIXED_WAITS · R14 WAIT_FOR_TERMINAL_STATE · R15 NO_REDUNDANT_WAITS · R16 NO_SOFT_ASSERT_AS_SYNC |
+| M5 Polling & Timeouts | R17 BOUNDED_POLLING · R18 TERMINAL_FAILURE_STATES · R19 TIMEOUT_HIERARCHY · R20 DIAGNOSTIC_WAIT_MESSAGE |
+| M6 Interaction Verification | `--repeat-each` evidence, failures mapped to rules |
 
 ---
 

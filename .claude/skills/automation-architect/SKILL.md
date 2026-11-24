@@ -3,8 +3,8 @@ name: automation-architect
 description: >
   Hub skill that orchestrates ui-pom-standard, spec-code-standard, spec-organisation-standard,
   git-workflow-docs-standard, api-setup-teardown-standard, and spec-quality-lifecycle-standard
-  (the TC lifecycle orchestrator, which in turn coordinates spec-requirements-standard and
-  spec-data-standard) for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix)
+  (the TC lifecycle orchestrator, which in turn coordinates spec-requirements-standard,
+  spec-data-standard and ui-locator-wait-standard) for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix)
   on existing files, or to scaffold new Page Objects, fixtures, spec files, and API layer
   following all agreed patterns. Invoke sub-skills independently for targeted checks.
 ---
@@ -56,8 +56,8 @@ description: >
 ```
 src/
   ui/
-    pages/          ← Page Objects       (ui-pom-standard)
-    components/     ← UI Components      (ui-pom-standard)
+    pages/          ← Page Objects       (ui-pom-standard, ui-locator-wait-standard)
+    components/     ← UI Components      (ui-pom-standard, ui-locator-wait-standard)
   fixtures/         ← Playwright fixtures (spec-code-standard)
   data/             ← Test data files     (spec-code-standard, ui-pom-standard)
   config/           ← Env config (ENV.ts) (spec-code-standard, ui-pom-standard)
@@ -177,7 +177,8 @@ a skill is added, updated, or retired.
 | `spec-organisation-standard` | Spec organisation & lifecycle | `tests/**/*.spec.ts` | R1–R5 | M5 | Active |
 | `git-workflow-docs-standard` | Git workflow | git state (no files) | C1–C3, E1–E5 | M5 | Active |
 | `api-setup-teardown-standard` | API layer structure · setup/teardown · fixture injection | `src/api/**/*.ts` · `src/fixtures/sites/{site}/{site}.fixtures.ts` · `tests/**/*.spec.ts` | R1–R8 | M6 | Active |
-| `spec-quality-lifecycle-standard` | TC lifecycle orchestrator · body quality · assertions · selectors · waits | `tests/**/*.spec.ts` · `src/ui/pages/**/*.ts` | R1–R10 | M7 | Active |
+| `spec-quality-lifecycle-standard` | TC lifecycle orchestrator · preconditions · assertions · independence | `tests/**/*.spec.ts` · `src/ui/pages/**/*.ts` | R1–R10 (R3, R5 delegated) | M7 | Active |
+| `ui-locator-wait-standard` | Locator strategy · uniqueness · action semantics · waits · polling · timeouts (lifecycle phases 3 Act · 5 Run) | `src/ui/pages/**` · `src/ui/components/**` · `tests/**/*.spec.ts` · `src/fixtures/**` · `playwright.config.ts` | R1–R20 · M0–M6 | M7 | Active |
 | `spec-requirements-standard` | TC specification: traceability · preconditions · data · oracles · postconditions · readiness (lifecycle phase 1 · Specify) | `docs/test-cases/**/*.md` | Q1–Q13 · M0–M4 | M6 | Active |
 | `spec-data-standard` | Test data: classification · isolation · sourcing · environments · expected values (lifecycle phases 2 Arrange · 4 Assert · 5 Run) | `src/data/**` · `src/config/**` · `src/fixtures/**` · `playwright.config.ts` · `tests/**/*.spec.ts` | R1–R15 · M0–M5 | M6 | Active |
 
@@ -188,7 +189,7 @@ check the same property on the same file.
 
 | File / Scope | Owner skill | Concern |
 |--------------|-------------|---------|
-| `src/ui/pages/**/*.ts` | `ui-pom-standard` | POM structure, locators, actions |
+| `src/ui/pages/**/*.ts` | `ui-pom-standard` | POM structure (getters, async actions) |
 | `src/ui/components/**/*.ts` | `ui-pom-standard` | Component structure |
 | `src/fixtures/sites/{site}/{site}.fixtures.ts` | `spec-code-standard` | Fixture completeness, import hygiene |
 | `tests/**/*.spec.ts` — imports, fixtures, credentials | `spec-code-standard` | Code quality |
@@ -208,9 +209,12 @@ check the same property on the same file.
 | `src/fixtures/sites/{site}/{site}.fixtures.ts` — lifecycle fixture naming | `api-setup-teardown-standard` | Naming convention (R8) |
 | `tests/**/*.spec.ts` — controller/client instantiation | `api-setup-teardown-standard` | No lifecycle instantiation in specs (R7) |
 | `tests/**/*.spec.ts` — preconditions/postconditions | `spec-quality-lifecycle-standard` | R1, R2 |
-| `tests/**/*.spec.ts` — assertion quality and waits | `spec-quality-lifecycle-standard` | R3, R4, R6, R9, R10 |
+| `tests/**/*.spec.ts` — assertion quality | `spec-quality-lifecycle-standard` | R4, R6, R9, R10 |
 | `tests/**/*.spec.ts` — test independence | `spec-quality-lifecycle-standard` | R7, R8 |
-| `src/ui/pages/**/*.ts` — locator resilience | `spec-quality-lifecycle-standard` | R5 |
+| `src/ui/pages/**/*.ts` — locator expression and actions | `ui-locator-wait-standard` | R1–R12 (replaces `spec-quality-lifecycle-standard` R5) |
+| `tests/**/*.spec.ts` — waits and synchronisation | `ui-locator-wait-standard` | R13–R16 (replaces `spec-quality-lifecycle-standard` R3) |
+| `tests/**/*.spec.ts` · `src/fixtures/**` — polling and timeouts | `ui-locator-wait-standard` | R17–R20 |
+| `playwright.config.ts` — test-id contract, timeout layers | `ui-locator-wait-standard` | R1, R19 |
 | `docs/test-cases/**/*.md` — specification content quality | `spec-requirements-standard` | Q1–Q13 (Mode 5 syncs rows only) |
 | `src/data/**` — shape, typing, uniqueness | `spec-data-standard` | R2, R3, R6 |
 | `src/config/**` — environment selection and validation | `spec-data-standard` | R9 |
@@ -281,6 +285,9 @@ When a rule depends on a version-specific feature, document it inline.
 | `test.step()` | 1.22 | `spec-organisation-standard` R5 |
 | `test()` native tag option `{ tag: [] }` | 1.42 | `spec-organisation-standard` (future tagging rules) |
 | `--grep @tag` (current approach) | any | `package.json test:smoke` |
+| `getByRole` / `getByLabel` / `getByText` / `getByTestId` / `getByAltText` / `getByTitle` · `testIdAttribute` | 1.27 | `ui-locator-wait-standard` R1 |
+| `expect.poll` with `intervals` · `expect().toPass` | 1.29 (`toPass` 1.29+) | `ui-locator-wait-standard` R17 |
+| `locator.pressSequentially()` (replaces deprecated `type()`) | 1.38 | `ui-locator-wait-standard` R9 |
 
 **Migration note:** The current `test:smoke` script uses `--grep @smoke` (regex-based).
 When `spec-organisation-standard` adds native tag rules, update the script to use
@@ -315,6 +322,7 @@ skills are affected. Use this impact table to identify what to update:
 | `src/config/env.ts` (new ENV var) | `spec-code-standard`, `ui-pom-standard` | Update data hygiene examples |
 | `playwright.config.ts` (testDir) | `spec-organisation-standard` | R1 folder structure root |
 | `src/config/env.ts` (`TEST_ENV` / new variable) | `spec-data-standard`, `spec-code-standard` | R9, credential examples |
+| `playwright.config.ts` (`testIdAttribute` / timeouts) | `ui-locator-wait-standard`, `ui-pom-standard` | R1, R19, PO getter examples |
 
 ---
 
@@ -339,12 +347,13 @@ Some skills produce output that other skills depend on. When running the Full Pi
 ```
 0. spec-requirements-standard ← reports TC specification quality (report only, Q13 auto-fix)
 1. ui-pom-standard          ← establishes correct PO layer (pages, components)
-2. spec-code-standard       ← validates spec code quality (imports, fixtures)
-3. spec-organisation-standard ← validates spec organisation (requires spec-code-standard clean)
-4. api-setup-teardown-standard ← validates API layer and teardown contract
-5. spec-data-standard       ← validates data isolation, sourcing, environments
-6. spec-quality-lifecycle-standard ← validates TC body quality, assertions, flakiness
-7. git-workflow-docs-standard ← validates git state (run last, before push/PR)
+2. ui-locator-wait-standard ← validates locators, actions, waits, polling (requires PO structure clean)
+3. spec-code-standard       ← validates spec code quality (imports, fixtures)
+4. spec-organisation-standard ← validates spec organisation (requires spec-code-standard clean)
+5. api-setup-teardown-standard ← validates API layer and teardown contract
+6. spec-data-standard       ← validates data isolation, sourcing, environments
+7. spec-quality-lifecycle-standard ← validates TC body quality, assertions, flakiness
+8. git-workflow-docs-standard ← validates git state (run last, before push/PR)
 ```
 
 If `ui-pom-standard` produces violations that are not fixed, `spec-organisation-standard` and
@@ -371,32 +380,36 @@ This is the default mode — when in doubt, run this.
    - Detect all POM violations
    - Auto-fix every fixable violation (R1–R8)
    - Collect remaining manual items
-4. Run `spec-code-standard` on spec files and `src/fixtures/sites/{site}/{site}.fixtures.ts`:
+4. Run `ui-locator-wait-standard` (M1–M5 rules) on Page Objects, specs, fixtures and config:
+   - Auto-fix R1 (test-id contract), R9, R11, R13, R15, R16, R20
+   - Collect R1–R8, R10, R12, R14, R17–R19 as manual fixes
+5. Run `spec-code-standard` on spec files and `src/fixtures/sites/{site}/{site}.fixtures.ts`:
    - Detect all test writing violations
    - Auto-fix every fixable violation (R1–R8)
    - Collect remaining manual items
-5. Run `spec-organisation-standard` on spec files:
+6. Run `spec-organisation-standard` on spec files:
    - Detect all TC organisation violations
    - Auto-fix every fixable violation (R1–R5)
    - Collect remaining manual items
-6. Run `api-setup-teardown-standard` on `src/api/` and `src/fixtures/sites/{site}/{site}.fixtures.ts` (teardown + injection):
+7. Run `api-setup-teardown-standard` on `src/api/` and `src/fixtures/sites/{site}/{site}.fixtures.ts` (teardown + injection):
    - Detect all API layer violations
    - Auto-fix every fixable violation (R1–R3, R5–R8)
    - Collect R4 (teardown) items as manual fixes
-7. Run `spec-data-standard` (M1–M4 rules) on fixtures, data, config, and specs:
+8. Run `spec-data-standard` (M1–M4 rules) on fixtures, data, config, and specs:
    - Auto-fix R2, R3, R6–R9, R11
    - Collect R1, R4, R5, R10, R12–R14 as manual fixes
-8. Run `spec-quality-lifecycle-standard` on `tests/**/*.spec.ts` and `src/ui/pages/**/*.ts`:
+9. Run `spec-quality-lifecycle-standard` on `tests/**/*.spec.ts` and `src/ui/pages/**/*.ts`:
    - Detect all TC quality violations
-   - Auto-fix every fixable violation (R3, R4)
-   - Collect R1, R2, R5–R10 items as manual fixes
-9. Emit unified summary report
+   - Auto-fix every fixable violation (R4)
+   - Collect R1, R2, R6–R10 items as manual fixes
+10. Emit unified summary report
 
 **Output:**
 ```
 [automation-architect] PIPELINE COMPLETE
 ─────────────────────────────────────────
 ui-pom-standard:                   X violations found — Y auto-applied
+ui-locator-wait-standard:          X violations found — Y auto-applied
 spec-code-standard:                X violations found — Y auto-applied
 spec-organisation-standard:        X violations found — Y auto-applied
 api-setup-teardown-standard:       X violations found — Y auto-applied
@@ -456,6 +469,8 @@ Import violations:  X
 - No constructor (BasePage handles it)
 - No `navigate()` override (BasePage handles it)
 - All locators as `get` properties (never constructor fields)
+- Locator expressions follow the `ui-locator-wait-standard` R1 hierarchy for the resolved
+  test-id contract, using only values observed in the DOM (R4)
 - All interactions as `async` methods
 - All imports via path aliases
 
@@ -476,6 +491,7 @@ Import violations:  X
 
 **Step 4 — Verify generated files:**
 - Run `ui-pom-standard` on the new Page Object → assert zero violations
+- Run `ui-locator-wait-standard` M1–M4 on the new Page Object and spec → assert zero ERRORs
 - Run `spec-code-standard` on the new spec → assert zero violations
 - Run `spec-organisation-standard` on the new spec → assert zero violations
 - If any violation is found, fix it before reporting SCAFFOLD COMPLETE
@@ -495,17 +511,18 @@ Created:  tests/ui/smoke/{feature}/TC{N}-{name}.spec.ts
 // src/ui/pages/InventoryPage.ts
 import { BasePage } from '@pages/BasePage';
 
+// test-id contract: testIdAttribute = 'data-test' (ui-locator-wait-standard R1)
 export class InventoryPage extends BasePage {
   get productList() {
-    return this.page.locator('[data-test="inventory-container"]');
+    return this.page.getByTestId('inventory-container');
   }
 
   get addToCartButton() {
-    return this.page.locator('[data-test="add-to-cart-sauce-labs-backpack"]');
+    return this.page.getByTestId('add-to-cart-sauce-labs-backpack');
   }
 
   async addProductToCart(productName: string): Promise<void> {
-    await this.page.locator(`[data-test="add-to-cart-${productName}"]`).click();
+    await this.page.getByTestId(`add-to-cart-${productName}`).click();
   }
 }
 ```
@@ -655,7 +672,8 @@ without activating the hub.
 `"tc quality"` · `"write tc"` · `"create tc"` · `"tc lifecycle"` ·
 `"assess test cases"` · `"refine test case"` · `"write test case"` · `"tc coverage"` ·
 `"data robustness"` · `"parallel safe"` · `"multi environment"` · `"assess test data"` ·
-`"verify robustness"`
+`"verify robustness"` · `"review locators"` · `"fix waits"` · `"assess locators"` ·
+`"strict mode violation"` · `"polling"` · `"verify interactions"` · `"flaky interaction"`
 
 **When to use:** Any work on a test case, from its specification to verified automation:
 writing or refining TC documents, writing or refactoring specs, intermittent failures,
@@ -667,6 +685,7 @@ failures only in parallel or in one environment, and before every PR with new or
    - `"tc lifecycle <TC>"` → Lifecycle mode (phases 1–5: Specify · Arrange · Act · Assert · Run)
    - TC specification triggers → phase 1, `spec-requirements-standard`
    - Data robustness triggers → phases 2, 4 (M4) and 5 (M5), `spec-data-standard`
+   - Locator and wait triggers → phase 3 Act (M0–M5) and phase 5 Run (M6), `ui-locator-wait-standard`
    - Single file provided → Enforce on that file only
    - `"write tc"` or `"create tc"` trigger → Create mode
    - No file provided → Enforce on all `tests/**/*.spec.ts`
@@ -674,7 +693,8 @@ failures only in parallel or in one environment, and before every PR with new or
 
 **Note:** Load `spec-quality-lifecycle-standard` directly for standalone TC quality review
 without activating the hub. As a domain orchestrator, it internally coordinates
-`ui-pom-standard` (locators) and `api-setup-teardown-standard` (teardown) for
+`ui-pom-standard` (POM structure), `ui-locator-wait-standard` (locators and waits)
+and `api-setup-teardown-standard` (teardown) for
 their respective concerns.
 
 ---
@@ -694,7 +714,7 @@ Fix:   <one sentence describing the fix> | AUTO-APPLIED
 | Scenario                             | Response                                                                 |
 |--------------------------------------|--------------------------------------------------------------------------|
 | File not found during scan           | Skip it; emit WARNING with `Issue: File not found during scan`           |
-| Ambiguous locator selector           | Generate getter with TODO comment: `// TODO: verify selector uniqueness` |
+| Ambiguous or unverified locator      | Apply `ui-locator-wait-standard` R1; value not observed in DOM → getter with `// TODO: verify locator in DOM` (R4) |
 | Fixture already registered           | Skip insertion; emit `WARNING — PO_REGISTERED_IN_FIXTURE: already exists`|
 | No alias covers a relative import    | Do not auto-apply; report as manual fix with tsconfig.json edit guidance  |
 | `authenticatedPage` fixture missing  | Auto-create it using `users.appUser` credentials; report as AUTO-APPLIED  |
@@ -720,6 +740,10 @@ To run a sub-skill independently, load it and invoke it by name:
 | Assess test data maturity | `spec-data-standard` | `"assess test data"` |
 | Make tests safe in parallel | `spec-data-standard` | `"parallel safe"` |
 | Verify robustness with evidence | `spec-data-standard` | `"verify robustness"` |
+| Assess locator and wait maturity | `ui-locator-wait-standard` | `"assess locators"` |
+| Fix fragile locators / strict-mode violations | `ui-locator-wait-standard` | `"review locators"` |
+| Replace fixed waits / add bounded polling | `ui-locator-wait-standard` | `"fix waits"` |
+| Prove interactions are stable with evidence | `ui-locator-wait-standard` | `"verify interactions"` |
 | Run everything | `automation-architect` | `"apply architecture"` |
 | Check folders + imports only | `automation-architect` | `"check structure"` |
 | Generate new PO + fixture + spec | `automation-architect` | `"scaffold InventoryPage"` |

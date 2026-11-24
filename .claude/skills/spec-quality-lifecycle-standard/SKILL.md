@@ -2,10 +2,11 @@
 name: spec-quality-lifecycle-standard
 description: >
   Enforce and auto-apply test case quality standards for Playwright + TypeScript projects.
-  Governs preconditions, postconditions, assertion quality, selector resilience, wait
-  strategies, and anti-flakiness patterns inside test bodies. Acts as domain orchestrator
-  for TC quality: coordinates ui-pom-standard (locators) and api-setup-teardown-standard
-  (teardown) for the parts they own, then applies its own rules for the test body.
+  Governs preconditions, postconditions, assertion quality, and anti-flakiness patterns
+  inside test bodies, and orchestrates locator and wait standards (ui-locator-wait-standard).
+  Acts as domain orchestrator for TC quality: coordinates ui-pom-standard (POM structure),
+  ui-locator-wait-standard (locators and waits) and api-setup-teardown-standard (teardown)
+  for the parts they own, then applies its own rules for the test body.
   Load when creating, reviewing, or debugging test cases.
 ---
 
@@ -23,8 +24,8 @@ description: >
   assertion that confirms the result of that action.
 - Assertions must use Playwright's web-first assertions (`expect(locator).toBeVisible()`),
   not JavaScript-first assertions (`expect(await locator.textContent()).toBe(...)`).
-- Locators must be resilient to DOM changes: prefer role, label, testid, and stable
-  text over positional CSS or XPath.
+- Locator choice, waits and polling are governed by `ui-locator-wait-standard`
+  (phase 3 Act).
 
 ### Domain orchestration — TC lifecycle phases
 
@@ -36,9 +37,9 @@ that live in it:
 |---|-------|-------------------|----------------|
 | 1 | Specify | What is tested, with which exact oracle? | `spec-requirements-standard` (Q1–Q13) |
 | 2 | Arrange | With which data, from which state — and how is it restored? | `spec-data-standard` (M1–M3) · `api-setup-teardown-standard` (setup + teardown) |
-| 3 | Act | Does the test interact robustly (structure, selectors, waits)? | `ui-pom-standard` (POM structure) · this skill R3 waits, R5 locators |
+| 3 | Act | Does the test interact robustly (structure, locators, actions, waits)? | `ui-pom-standard` (POM structure) · `ui-locator-wait-standard` (M0–M5, R1–R20) |
 | 4 | Assert | Does it check the exact value and explain the failure? | this skill R1, R4, R6, R9, R10 · `spec-data-standard` M4 (R13–R14) |
-| 5 | Run | Does it stay green in parallel, repeatedly, per environment, with the right selection? | `spec-data-standard` M5 · data-impact tags (R11) |
+| 5 | Run | Does it stay green in parallel, repeatedly, per environment, with the right selection? | `spec-data-standard` M5 · `ui-locator-wait-standard` M6 · data-impact tags (R11) |
 
 **Cross-cutting — Debugging:** every phase reports failures with an actionable message
 (blocking rule, file, real cause). Debugging is not a final phase: e.g. an unchecked HTTP
@@ -60,8 +61,8 @@ without any code change. The root causes are almost always one of these five:
 ```
 1. Missing precondition assertion  → test starts in unknown state
 2. Missing teardown               → state leaks into next test
-3. Hardcoded wait                 → passes on fast machines, fails on slow
-4. Fragile selector               → breaks when DOM changes structurally
+3. Hardcoded wait                 → passes on fast machines, fails on slow    (ui-locator-wait-standard R13–R20)
+4. Fragile selector               → breaks when DOM changes structurally     (ui-locator-wait-standard R1–R8)
 5. Assertion not tied to action   → passes even when the action failed silently
 ```
 
@@ -82,8 +83,9 @@ intermittent failures.
 
 **Steps:**
 1. Discover all `*.spec.ts` files under `tests/`
-2. Apply all rules (R1–R10) to each file
-3. For R5 (locator resilience): coordinate with `ui-pom-standard` for deeper PO analysis
+2. Apply R1, R2, R4, R6–R10 to each file
+3. Run `ui-locator-wait-standard` M1–M5 on the same files and on the Page Objects they use;
+   forward its findings verbatim (R3 and R5 are delegated to it)
 4. For R2 (postcondition): cross-check with `api-setup-teardown-standard` R4.
    For R10 (specificity): cross-check with `spec-data-standard` R13
 5. Auto-fix every AUTO-FIX violation
@@ -136,6 +138,8 @@ await test.step('<action description>', async () => {
   await expect(<fixture>.<result>).toBeVisible(); // ← assertion always follows
 });
 ```
+Every state-changing action waits for its terminal state from the handoff oracle
+(`ui-locator-wait-standard` R14). New getters follow its R1 locator hierarchy.
 
 **Step 4 — Generate postcondition verification as the last step:**
 ```typescript
@@ -144,7 +148,7 @@ await test.step('Verify postcondition: <expected final state>', async () => {
 });
 ```
 
-**Step 5 — Run all R1–R10 rules on the generated file — assert zero violations.**
+**Step 5 — Run R1, R2, R4, R6–R10 and `ui-locator-wait-standard` M1–M5 on the generated file — assert zero violations.**
 
 ---
 
@@ -156,17 +160,18 @@ await test.step('Verify postcondition: <expected final state>', async () => {
 1. Specify: `spec-requirements-standard` M0 → M2 if not Ready → M4 handoff
 2. Arrange: `spec-data-standard` M0 → M1–M3 on the handoff data; `api-setup-teardown-standard`
    (Add mode if a controller or fixture is missing; teardown after `use()`)
-3. Act: `ui-pom-standard` on the Page Objects used by the TC; R3 (waits) and R5 (locators)
+3. Act: `ui-pom-standard` on the Page Objects used by the TC; `ui-locator-wait-standard`
+   M0 → M1–M5 (locators, actions, waits, polling)
 4. Assert: Create mode (new TC) or Enforce mode (existing TC); `spec-data-standard` M4
-5. Run: `spec-data-standard` M5 on the TC
+5. Run: `spec-data-standard` M5 and `ui-locator-wait-standard` M6 on the TC
 
 ```
 [spec-quality-lifecycle-standard] LIFECYCLE — TC{N}
 1 Specify   ✅ Ready (score <n>%)          | ❌ blocked: <rule>
 2 Arrange   ✅ Level <n> · teardown ok     | ❌ blocked: <rule>
-3 Act       ✅ POM · waits · locators      | ❌ blocked: <rule>
+3 Act       ✅ POM · interaction Level <n> | ❌ blocked: <rule>
 4 Assert    ✅ exact values, 0 violations  | ❌ <n> violations
-5 Run       ✅ HERMETIC (<passed>/<total>) | ❌ NOT HERMETIC (cause: <category>)
+5 Run       ✅ HERMETIC · DETERMINISTIC    | ❌ NOT HERMETIC / NOT DETERMINISTIC (cause: <category>)
 ```
 
 ---
@@ -233,20 +238,9 @@ test('TC02: ...', async ({
 
 ---
 
-### R3 — NO_HARDCODED_WAITS (ERROR, AUTO-FIX)
+### R3 — NO_HARDCODED_WAITS → [DELEGATED] `ui-locator-wait-standard` R13 (M4)
 
-**Condition:** Any call to `page.waitForTimeout(N)`, `setTimeout(N, ...)`, or
-`new Promise(r => setTimeout(r, N))` in a spec file or Page Object.
-
-**Auto-fix replacement table:**
-
-| Hardcoded wait | Semantic replacement |
-|---------------|---------------------|
-| Wait for element | `await expect(locator).toBeVisible()` |
-| Wait for navigation | `await page.waitForURL(pattern)` + assertion |
-| Wait for network idle | `await page.waitForLoadState('networkidle')` _(use sparingly)_ |
-| Wait for element gone | `await expect(locator).toBeHidden()` |
-| Wait for text change | `await expect(locator).toHaveText(newText)` |
+Detection and auto-fix moved (ADR-004). Enforce mode forwards wait findings verbatim.
 
 ---
 
@@ -269,22 +263,9 @@ awaited before being passed to `expect()`.
 
 ---
 
-### R5 — RESILIENT_LOCATORS (WARNING, MANUAL-FIX)
+### R5 — RESILIENT_LOCATORS → [DELEGATED] `ui-locator-wait-standard` R1–R3, R5 (M1–M2)
 
-**Condition:** A locator in a Page Object uses a fragile selector strategy.
-
-**Fragile (avoid):**
-- Positional: `.first()` or `.nth(0)` as the ONLY disambiguation
-- Long CSS chains: `div.wrapper > ul > li:nth-child(2) > span.label`
-- XPath: `//div[@class='container']//button[2]`
-- Text that changes with locale or data
-
-**Resilient (prefer):**
-- `getByRole('button', { name: 'Submit' })` — semantic HTML role
-- `getByLabel('Email address')` — associated label text
-- `locator('[data-testid="submit-btn"]')` — purpose-built attribute
-- `locator('#unique-id')` — unique DOM ID
-- `getByText('Static label', { exact: true })` — stable text
+Detection moved (ADR-004). Enforce mode forwards locator findings verbatim.
 
 ---
 
@@ -384,8 +365,10 @@ Fix:   <one sentence describing the fix> | AUTO-APPLIED | MANUAL-FIX
 
 | File glob | Rules applied |
 |-----------|---------------|
-| `tests/**/*.spec.ts` | R1, R2, R3, R4, R6, R7, R8, R9, R10 |
-| `src/ui/pages/**/*.ts` | R3, R4, R5 (locator and wait quality in POs) |
+| `tests/**/*.spec.ts` | R1, R2, R4, R6, R7, R8, R9, R10 |
+| `src/ui/pages/**/*.ts` | R4 |
+
+Locators and waits: see the `ui-locator-wait-standard` Scan Scope.
 
 ---
 

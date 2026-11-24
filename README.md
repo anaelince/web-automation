@@ -145,7 +145,7 @@ web-automation/
 │
 ├── .claude/                      # Claude Code configuration (CLAUDE.md at repo root)
 │   ├── skills/                   # Claude skills (same set as .kiro/skills + spec-data,
-│   │                             #   spec-requirements, framework-reference)
+│   │                             #   spec-requirements, ui-locator-wait, framework-reference)
 │   ├── rules/                    # Path-scoped rules (former Kiro manual steering)
 │   ├── hooks/                    # docs-sync-on-push.cjs (PostToolUse after git push)
 │   └── settings.json             # Shared permissions + hook registration
@@ -270,15 +270,17 @@ Skills marked *(Claude only)* are not yet available in Kiro.
 | `api-setup-teardown-standard` | Enforces API layer structure, teardown contract, and token refresh rules | Implementing API-based setup/teardown or scaffolding a new API resource |
 | `spec-organisation-standard` | Enforces TC folder structure and naming | Creating or reorganising test cases |
 | `spec-code-standard` | Enforces spec code quality and site-layer placement | Writing or reviewing spec files |
-| `spec-quality-lifecycle-standard` | Enforces TC lifecycle quality: preconditions, assertions, selectors, wait strategies, anti-flakiness. Orchestrates `spec-requirements-standard` and `spec-data-standard` | Writing, reviewing, or debugging test cases |
+| `spec-quality-lifecycle-standard` | Enforces TC lifecycle quality: preconditions, assertions, anti-flakiness. Orchestrates `spec-requirements-standard`, `spec-data-standard` and `ui-locator-wait-standard` | Writing, reviewing, or debugging test cases |
+| `ui-locator-wait-standard` *(Claude only)* | Locators and waits: contract-aware locator hierarchy (test id → role → label → placeholder → text → alt → title → CSS/XPath), uniqueness, action semantics, terminal-state waits, bounded polling, timeouts, verification runs | Writing or reviewing locators, Page Object getters, waits or polling; diagnosing timeouts or strict-mode failures |
 | `spec-requirements-standard` *(Claude only)* | Writes and assesses TC specifications in `docs/test-cases/**`: traceability, preconditions, deterministic expected results, automation readiness | Before automating a TC or when writing TCs from requirements |
 | `spec-data-standard` *(Claude only)* | Test data robustness: data maturity levels, parallel isolation, typed/data-driven data, multi-environment portability, verification runs | Tests that create or read data, enabling parallel runs, adding an environment |
 | `git-workflow-docs-standard` | Validates and executes git workflow + docs sync | Before committing, pushing, or opening a PR |
 | `framework-reference` *(Claude only)* | Loads path aliases, Playwright config, tech stack and BasePage contract at once | Scaffolding a feature or reviewing architecture |
 | `automation-architect` | Hub — orchestrates the sub-skills above | Full architecture review or scaffolding a new feature |
 
-See [ADR-002](docs/decisions/ADR-002-spec-data-standard.md) and
-[ADR-003](docs/decisions/ADR-003-spec-requirements-standard.md) for the rationale of the two newest skills.
+See [ADR-002](docs/decisions/ADR-002-spec-data-standard.md),
+[ADR-003](docs/decisions/ADR-003-spec-requirements-standard.md) and
+[ADR-004](docs/decisions/ADR-004-ui-locator-wait-standard.md) for the rationale of the three newest skills.
 
 **Example usage in chat:**
 

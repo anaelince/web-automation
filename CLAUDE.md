@@ -66,7 +66,7 @@ Always use aliases — never relative imports (`./` or `../`):
 
 ## Skills — Active Rules
 
-This project enforces 7 AI Automation SDLC skills.  
+This project enforces 10 AI Automation SDLC skills.  
 For the **full rule set** load: `@docs/agents/claude/skill-reference.md`
 
 **Quick trigger:** Say `"apply architecture"` after loading `@docs/agents/claude/skill-reference.md`
@@ -77,7 +77,10 @@ For the **full rule set** load: `@docs/agents/claude/skill-reference.md`
 | `api-setup-teardown-standard` | API layer, setup/teardown, token lifecycle |
 | `spec-organisation-standard` | Spec file location and naming |
 | `spec-code-standard` | Imports, fixtures, credentials |
-| `spec-quality-lifecycle-standard` | TC lifecycle, assertions, anti-flakiness |
+| `spec-quality-lifecycle-standard` | TC lifecycle orchestrator, assertions, anti-flakiness |
+| `spec-requirements-standard` | TC specifications (`docs/test-cases/`) |
+| `spec-data-standard` | Test data isolation, sourcing, environments |
+| `ui-locator-wait-standard` | Locator hierarchy, uniqueness, actions, waits, polling |
 | `git-workflow-docs-standard` | Commit format, docs sync |
 | `automation-architect` | Hub: full pipeline |
 
@@ -96,6 +99,8 @@ For the **full rule set** load: `@docs/agents/claude/skill-reference.md`
 - Locators are `get` properties — NEVER constructor fields (ES2022 requirement)
 - Actions are `async` methods — no assertions inside POs
 - No `navigate()` override — `BasePage.navigate(path)` handles it
+- Locator hierarchy: test-id contract (if the team defines one) → role → label → placeholder →
+  text → alt text → title → CSS/XPath with a `// locator:` reason. No positions without a business rule
 
 ### API layer
 - `ApiClient` is the ONLY file that calls `request.*` directly
@@ -109,6 +114,8 @@ For the **full rule set** load: `@docs/agents/claude/skill-reference.md`
 - First `test.step()` must assert preconditions are met
 - Tests that create data must include a `clean<Resource>` fixture parameter
 - Never use `page.waitForTimeout()` — use Playwright's auto-waits
+- After every state-changing action, wait for the terminal state that proves completion;
+  polling (`expect.poll` / `toPass`) always has timeout, intervals, failure states and a message
 - Use web-first assertions: `expect(locator).toBeVisible()` not `expect(await locator.isVisible()).toBe(true)`
 - No `if/else` inside `test()` body — conditional logic belongs in POs/fixtures
 - After every navigation, assert that the target page loaded before interacting

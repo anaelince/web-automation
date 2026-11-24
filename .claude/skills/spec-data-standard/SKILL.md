@@ -73,6 +73,7 @@ USE (test · worker · pool scope) → CLEAN (scoped teardown)
 | Credential source | `spec-code-standard` R7 | Not re-checked |
 | Test independence / module state | `spec-quality-lifecycle-standard` R7 | Not re-checked |
 | Assertion specificity | `spec-quality-lifecycle-standard` R10 | R13 provides the expected-value source |
+| Values inside locator filters | `ui-locator-wait-standard` R6 | `filter({ hasText })` values follow the same controlled sources as R13 |
 | Tag syntax | `spec-organisation-standard` | R11 defines tag **meaning** only |
 
 ---

@@ -15,20 +15,24 @@ description: >
   not constructor fields (`this.page` is undefined during class field initialisation)
 - `baseURL` configured in `playwright.config.ts` via `process.env.BASE_URL` (loaded by dotenv)
 - Path aliases are the only allowed import style — relative paths are always a violation
+- This skill governs **where** a locator lives (getters) and the PO structure. **Which**
+  locator to use (hierarchy, test-id contract, uniqueness) and waits belong to
+  `ui-locator-wait-standard`. Examples below assume the test-id contract
+  `testIdAttribute: 'data-test'` (saucedemo), so they use `getByTestId`
 
 ## Critical Pattern: Getters vs Constructor Fields
 
 ```typescript
 // ❌ WRONG — broken with ES2022 useDefineForClassFields: true
 export class LoginPage extends BasePage {
-  private usernameInput = this.page.locator('[data-test="username"]');
+  private usernameInput = this.page.getByTestId('username');
   // this.page is UNDEFINED here — class fields run before super() assigns it
 }
 
 // ✅ CORRECT — getter runs lazily at call time, this.page is already set
 export class LoginPage extends BasePage {
   get usernameInput() {
-    return this.page.locator('[data-test="username"]');
+    return this.page.getByTestId('username');
   }
 }
 ```
@@ -102,8 +106,8 @@ export class LoginPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.usernameInput = this.page.locator('[data-test="username"]');
-    this.loginButton   = this.page.locator('[data-test="login-button"]');
+    this.usernameInput = this.page.getByTestId('username');
+    this.loginButton   = this.page.getByTestId('login-button');
   }
 }
 ```
@@ -111,8 +115,8 @@ export class LoginPage extends BasePage {
 **Example — after:**
 ```typescript
 export class LoginPage extends BasePage {
-  get usernameInput() { return this.page.locator('[data-test="username"]'); }
-  get loginButton()   { return this.page.locator('[data-test="login-button"]'); }
+  get usernameInput() { return this.page.getByTestId('username'); }
+  get loginButton()   { return this.page.getByTestId('login-button'); }
 }
 ```
 

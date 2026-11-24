@@ -758,3 +758,70 @@ Replace the "Domain orchestration" table of Revision 2 with:
 - Teardown (postconditions) is owned by Arrange even though it executes after Assert.
 - Lifecycle mode output becomes 5 rows: Specify · Arrange · Act · Assert · Run.
 - Hub Mode 7 routing: specification → phase 1; data robustness → phases 2, 4 (M4), 5 (M5).
+
+---
+
+## Revision 4 — Act phase delegated to `ui-locator-wait-standard` (2026-11-23)
+
+**Decision record:** `docs/decisions/ADR-004-ui-locator-wait-standard.md` ·
+**Skill prompt:** `docs/skills/ui-locator-wait-standard-prompt.md`
+
+**Why:** Module 7 defines a full locator and wait discipline (hierarchy with team test-id
+contract, uniqueness, action semantics, terminal-state waits, bounded polling, timeout
+hierarchy, diagnostics). This skill only had R3 and R5 for it. Phase 3 Act now has a dedicated
+owner, and this skill keeps orchestrating it.
+
+Apply these changes to the EXISTING `spec-quality-lifecycle-standard/SKILL.md`. Do not delete
+rule IDs — R3 and R5 become delegation stubs (Hub Growth Policy Rule 5).
+
+### 1. Update the lifecycle table (rows 3 and 5)
+
+| # | Phase | Question answered | Skills (rules) |
+|---|-------|-------------------|----------------|
+| 3 | Act | Does the test interact robustly (structure, locators, actions, waits)? | `ui-pom-standard` (POM structure) · `ui-locator-wait-standard` (M0–M5, R1–R20) |
+| 5 | Run | Green in parallel, repeatedly, per environment, with the right selection? | `spec-data-standard` M5 · `ui-locator-wait-standard` M6 · tags (R11) |
+
+### 2. Replace R3 and R5 with delegation stubs
+
+```markdown
+### R3 — NO_HARDCODED_WAITS → [DELEGATED] `ui-locator-wait-standard` R13 (M4)
+Detection and auto-fix moved. Enforce mode forwards wait findings verbatim.
+
+### R5 — RESILIENT_LOCATORS → [DELEGATED] `ui-locator-wait-standard` R1–R3, R5 (M1–M2)
+Detection moved. Enforce mode forwards locator findings verbatim.
+```
+
+### 3. Update Project Context
+
+- Replace the bullet *"Locators must be resilient to DOM changes…"* with:
+  *"Locator choice, waits and polling are governed by `ui-locator-wait-standard`
+  (phase 3 Act)."*
+- Keep the bullets on web-first assertions and auto-waiting (they belong to Assert).
+- Update the frontmatter description: replace *"selector resilience, wait strategies"* with
+  *"orchestrates locator and wait standards (`ui-locator-wait-standard`)"*, and replace
+  *"coordinates ui-pom-standard (locators)"* with
+  *"coordinates ui-pom-standard (POM structure), ui-locator-wait-standard (locators and waits)"*.
+
+### 4. Update Enforce mode
+
+- Step 2: *"Apply R1, R2, R4, R6–R10 to each file"*.
+- Step 3 becomes: *"Run `ui-locator-wait-standard` M1–M5 on the same files and on the Page
+  Objects they use; forward its findings verbatim"*.
+
+### 5. Update Lifecycle mode and Create mode
+
+- Lifecycle mode, phase 3 Act: `ui-pom-standard` → `ui-locator-wait-standard` M0 → M1–M5.
+  Phase 5 Run: `spec-data-standard` M5 **and** `ui-locator-wait-standard` M6. The Act row of
+  the output shows `✅ Level <n>` from M0.
+- Create mode Step 3: every state-changing action is followed by the wait on its terminal state
+  from the handoff oracle (`ui-locator-wait-standard` R14); new getters follow the R1 hierarchy.
+
+### 6. Update "The flaky test lifecycle"
+
+Causes 3 (*Hardcoded wait*) and 4 (*Fragile selector*) reference `ui-locator-wait-standard`
+(R13–R20 and R1–R8) as their owner.
+
+### 7. Update Scan Scope
+
+Remove R3 and R5 from the table; add the note *"Locators and waits: see `ui-locator-wait-standard`
+Scan Scope"*. Run `wc -l` after applying; the skill must stay under 400 lines.

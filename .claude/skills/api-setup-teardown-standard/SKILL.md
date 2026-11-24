@@ -157,6 +157,11 @@ per-test identity is needed, add `create<Identity>` / `delete<Identity>` to the 
 controller and wire a `worker<Resource>` fixture with `{ scope: 'worker' }` that creates the
 identity before `use()` and deletes it after.
 
+**State reads for polling** (requested by `ui-locator-wait-standard` M5): when a test waits for
+an asynchronous resource, add `get<Resource>Status(id)` to its controller and declare the state
+union (success and terminal failure states) in `models/`. Bounded polling (R17) calls this method,
+never `request.*`.
+
 **Step 7 — Run full scan on `src/api/`:**
 - Run all rules (R1–R6) on the entire `src/api/` folder
 - Auto-fix any violations introduced by the new files
